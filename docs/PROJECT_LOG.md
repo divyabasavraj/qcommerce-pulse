@@ -14,7 +14,7 @@ Automatic daily collection runs aren't listed here; they're in `run_log.csv` in 
 | 2 | Data-quality report | 0.5 day | ✅ Done 2026-10-20 |
 | 3 | Theme labelling | 1 day | 🟡 LLM labelled 3,300 reviews; waiting on 300 hand labels + accuracy check |
 | 4 | Fast classifier | 0.5 day | ⬜ |
-| 5 | SQL metrics + expected-range alerts | 1 day | ⬜ |
+| 5 | SQL metrics + expected-range alerts | 1 day | 🟡 Rating/volume metrics + alerts done; theme shares wired, need the classifier (M4) |
 | 6 | Weekly report | 0.5 day | ⬜ |
 | 7 | Monthly memo + Diwali deep-dive | 1 day | ⬜ Diwali analysis needs data from after Nov 8 |
 | 8 | Dashboard | 0.5 day | ⬜ |
@@ -23,7 +23,7 @@ Automatic daily collection runs aren't listed here; they're in `run_log.csv` in 
 **Open decisions (from PLAN.md §17):**
 - [x] Swiggy Instamart app ID → standalone app `in.swiggy.android.instamart` (2026-10-20)
 - [ ] Number of hand labels (300 drawn; confirm after labelling)
-- [ ] Alert sensitivity (set in milestone 5 after looking at week-to-week noise)
+- [x] Alert sensitivity → k = 2.5 × SD of an 8-week baseline, min 200 reviews/week (2026-10-20; re-check with theme metrics)
 - [ ] Dashboard: Streamlit vs Looker Studio
 
 ---
@@ -105,7 +105,8 @@ filling in a few reviews a day. **Lesson: a run log saying `ok` isn't evidence o
 - Report bugs fixed: example tables were empty (DuckDB `USING SAMPLE` runs before `WHERE`), and dates printed with `00:00:00`.
 
 **Instamart low days checked.** Instamart's 6 "low days" (Apr 25 – May 2) dip smoothly to ~30/day and recover
-by May 6, never zero. That's a real lull, not a collection cut.
+by May 6, never zero. That's a real lull, not a collection cut. **Wrong — corrected in Milestone 5 below:** it's
+a Play Store artifact affecting all four apps before May 6.
 
 ### LLM labelling run (later the same day)
 - Labelled the 300-review hand set (~3 min) and the 3,000-review training set (~45 min) with `qwen2.5:7b`.
@@ -122,3 +123,66 @@ by May 6, never zero. That's a real lull, not a collection cut.
 - **Divya:** hand-label the 300 reviews (`uv run python -m qpulse.hand_label`, ~1–1.5 h); note any missing theme.
 - Then `uv run python -m qpulse.evaluate data/labels/llm_labels_qwen2.5-7b.csv` → LLM accuracy vs hand labels; refine taxonomy.
 - Milestone 5 (SQL metrics + alerts) can start in parallel; it doesn't need the labels.
+
+### Milestone 5: SQL metrics and expected-range alerts (evening)
+
+#### Work done
+- **Found a source artifact before building any metric.** Weekly ratings for the first two backfill weeks were far
+  below normal in *every* app (Zepto 1.5★ vs ~3.3★, BigBasket 1.7★ vs ~4.1★). By day, volume and rating step up
+  together on **May 6 2026 in all four apps**; before that, reviews are ~⅓ the volume, ~2× as long and much more
+  negative (Zepto 1.8★ vs 3.2★, 13% vs 35% very short). Same in `en` and `hi`. Four competitors don't change
+  overnight on the same day, so it's the source: the Play Store serves only a skewed subset of reviews older than
+  ~5.5 months (167 days before the backfill). Added a computed before/after table and decision to
+  `docs/DATA_QUALITY.md` (section "Oldest reviews"), via `src/qpulse/quality.py`.
+- `src/qpulse/config.py`: `METRICS_START = 2026-05-11` (first full week after the cutoff), `BASELINE_WEEKS = 8`,
+  `ALERT_K = 2.5`, `ALERT_MIN_N = 200`.
+- `sql/weekly_metrics.sql`: `metric_reviews` (excludes repeated-text and link reviews, full Mon–Sun weeks only) and
+  `weekly_metrics` in long form `(app, week, metric, kind, denom, value, se)`: review count, avg rating, 1★ share.
+  23 full weeks × 4 apps (May 11 – Oct 12).
+- `sql/weekly_theme_metrics.sql`: theme shares per app-week from a `review_themes(review_id, theme)` table;
+  denominator = reviews with text. Ready for the classifier's output.
+- `sql/alerts.sql`: expected range = mean of the previous 8 weeks ± k × max(their SD, sampling error);
+  alert needs a full 8-week baseline and ≥200 reviews. Reports direction and z.
+- `src/qpulse/metrics.py`: sets the SQL variables, unions metric views, labels alerts worse / better / change
+  (volume has no good direction). `--calibrate` writes `docs/ALERT_CALIBRATION.md`; `--themes FILE` adds theme
+  shares from a wide 0/1 label CSV.
+- **Cross-checked the SQL against an independent pandas rebuild from raw reviews:** same 92 app-weeks, review counts,
+  avg ratings and 1★ shares identical; 8-week baseline mean/SD match to 1e-16. Theme share for one app-week matched
+  a hand count (1 of 1,536).
+- **Backtest (15 scored weeks, 12 series):** k = 2 → 27 alerts (1.8/week, 15% of metric-weeks); k = 2.5 → 12 (0.8/week);
+  k = 3 → 3 (0.2/week). Latest full week (Oct 12): 0 alerts.
+
+#### Decisions
+**Metrics start May 11, rows kept.** The pre-May-6 rows are real reviews but not a fair sample, so they'd make the
+first baseline look like a crisis. Kept on disk (useful for long-review text analysis), excluded from metrics.
+
+**k = 2.5 (open decision closed, provisionally).** At k = 2, 15% of metric-weeks flag, three times what normal
+noise would give, because an SD from only 8 values is itself noisy. At k = 3 only 3 alerts in 15 weeks, and it
+misses events that look real when read: Blinkit's rating improving two weeks running (Sep 28, Oct 5) flagged by
+*both* avg rating and 1★ share, and BigBasket's 1★ share jumping to 19.6% (Aug 10). Re-check when ~40 theme
+series are added; that's roughly 4× the alerts.
+
+**Developer-reply rate is not a weekly metric.** `has_reply` is the state when the review was collected and the
+collector never re-reads old reviews, so recent weeks always look under-replied. Belongs in the reply deep-dive
+(month 3), which will need re-collection.
+
+**Long-form metric table.** Every metric (rating, volume, each theme) is a row, so one alert query covers them all
+and adding themes needs no change to `alerts.sql`.
+
+#### Failures and fixes
+- **Earlier conclusion was wrong:** the Instamart "real lull" (Apr 25 – May 2) is this source artifact. It was
+  checked one app at a time; comparing all four apps by day is what showed it. **Lesson: when one app looks odd,
+  check whether the others moved on the same day before calling it real.**
+- Volume alerts were labelled "better": pandas turns the missing good/bad direction into NaN, so `is None` never
+  matched. Caught while reading the cross-check output; fixed with `pd.isna`.
+- A theme share of exactly 0 had a sampling error of 0, so a rare theme could alert on almost nothing (seen in a
+  smoke test with the sampled LLM labels). For shares the floor now uses the baseline share.
+- The noise table applied the share error formula to review counts (sqrt of a negative number → DuckDB error).
+  Now computed per metric kind.
+
+#### Next
+- **Divya:** hand-label the 300 reviews (`uv run python -m qpulse.hand_label`), then run `qpulse.evaluate`.
+- Milestone 4 (classifier) → write its output as `review_themes`, re-run `--calibrate` with themes, re-check k.
+- Milestone 6 adds version watch (rating / bug-theme share by app version) and the competitor view on top of
+  `all_metrics`.
+

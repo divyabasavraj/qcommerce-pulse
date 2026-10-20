@@ -53,6 +53,21 @@ Reviewer names and profile images are never written to disk. Phone numbers and e
 
 A *low day* has under 20% of the app's median daily reviews. A run of low days means a collection gap (see the run log), not customers going quiet.
 
+## Oldest reviews: a skewed subset before May 6
+
+On May 6 2026 volume and rating step up on the same day in all four apps. Before it, reviews are fewer, longer and much more negative (table: all days before May 6 vs the 14 days after). Four competitors don't change together overnight, so this is the source: the Play Store serves only part of the reviews older than ~5.5 months (May 6 was 167 days before the backfill on Oct 20), and short positive ones drop out. **Decision:** keep the rows, but metrics start at the first full week after it (`METRICS_START = 2026-05-11` in `config.py`).
+
+| app | period | reviews_per_day | avg_rating | avg_words | pct_very_short |
+|---|---|---|---|---|---|
+| bigbasket | May 6 on | 192.0 | 4.1 | 10.0 | 45.1 |
+| bigbasket | before May 6 | 59.0 | 2.38 | 21.1 | 21.0 |
+| blinkit | May 6 on | 1628.0 | 4.1 | 6.5 | 52.6 |
+| blinkit | before May 6 | 686.0 | 3.63 | 10.5 | 35.2 |
+| instamart | May 6 on | 209.0 | 3.99 | 7.0 | 59.0 |
+| instamart | before May 6 | 63.0 | 2.8 | 17.1 | 33.9 |
+| zepto | May 6 on | 282.0 | 3.22 | 16.0 | 35.4 |
+| zepto | before May 6 | 130.0 | 1.8 | 28.8 | 12.9 |
+
 ### Examples: Same ≥40-character text posted ≥3 times for one app
 
 | app | rating | text |

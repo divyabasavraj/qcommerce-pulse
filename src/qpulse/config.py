@@ -22,3 +22,12 @@ COUNTRY = "in"
 BACKFILL_DAYS = 183
 # Daily runs re-read this many days before the newest stored review, to catch late-indexed reviews.
 OVERLAP_DAYS = 2
+
+# First full week used for metrics. Before May 6 2026 the Play Store served only a skewed subset of
+# reviews (fewer, longer, far more negative, all four apps at once): ~167 days back from the backfill.
+METRICS_START = "2026-05-11"
+# Expected-range alerts: baseline weeks, range width in standard deviations, minimum reviews in the week.
+# Width and minimum chosen from the backtest in docs/ALERT_CALIBRATION.md.
+BASELINE_WEEKS = 8
+ALERT_K = 2.5
+ALERT_MIN_N = 200

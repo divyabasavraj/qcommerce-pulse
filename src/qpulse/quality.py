@@ -114,6 +114,19 @@ def main() -> None:
         FROM daily JOIN med USING (app) GROUP BY app, m ORDER BY app
     """).df()
 
+    # Play Store serves only a skewed subset of older reviews; see "Oldest reviews" in the report.
+    cutoff = con.sql("""
+        SELECT app,
+               CASE WHEN review_date < DATE '2026-05-06' THEN 'before May 6' ELSE 'May 6 on' END AS period,
+               round(count(*) / count(DISTINCT review_date)) AS reviews_per_day,
+               round(avg(rating), 2) AS avg_rating,
+               round(avg(n_words), 1) AS avg_words,
+               round(100 * avg(is_very_short::INT), 1) AS pct_very_short
+        FROM reviews_clean
+        WHERE review_date < DATE '2026-05-06' + 14
+        GROUP BY ALL ORDER BY app, period
+    """).df()
+
     usable = con.sql("""
         SELECT count(*) FILTER (WHERE NOT (is_repeated_text OR has_link)) AS for_ratings,
                count(*) FILTER (WHERE NOT (is_repeated_text OR has_link OR is_empty_or_symbols)) AS for_themes,
@@ -149,6 +162,14 @@ def main() -> None:
         md_table(gaps),
         "\nA *low day* has under 20% of the app's median daily reviews. A run of low days means a collection gap "
         "(see the run log), not customers going quiet.",
+        "## Oldest reviews: a skewed subset before May 6",
+        "On May 6 2026 volume and rating step up on the same day in all four apps. Before it, reviews are fewer, "
+        "longer and much more negative (table: all days before May 6 vs the 14 days after). Four competitors "
+        "don't change together overnight, so this is the source: the Play Store serves only part of the reviews "
+        "older than ~5.5 months (May 6 was 167 days before the backfill on Oct 20), and short positive ones drop "
+        "out. **Decision:** keep the rows, but metrics start at the first full week after it "
+        "(`METRICS_START = 2026-05-11` in `config.py`).",
+        md_table(cutoff),
     ]
     for f, ex in examples.items():
         parts += [f"### Examples: {DECISIONS[f][0]}", md_table(ex) if len(ex) else "_none_"]
