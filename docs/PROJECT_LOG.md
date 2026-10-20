@@ -12,7 +12,7 @@ Automatic daily collection runs aren't listed here; they're in `run_log.csv` in 
 |---|---|---|---|
 | 1 | Collector + 6-month backfill | 0.5 day | ✅ Done 2026-10-20 |
 | 2 | Data-quality report | 0.5 day | ✅ Done 2026-10-20 |
-| 3 | Theme labelling | 1 day | 🟡 Tools built; waiting on 300 hand labels and the LLM labelling run |
+| 3 | Theme labelling | 1 day | 🟡 LLM labelled 3,300 reviews; waiting on 300 hand labels + accuracy check |
 | 4 | Fast classifier | 0.5 day | ⬜ |
 | 5 | SQL metrics + expected-range alerts | 1 day | ⬜ |
 | 6 | Weekly report | 0.5 day | ⬜ |
@@ -107,7 +107,18 @@ filling in a few reviews a day. **Lesson: a run log saying `ok` isn't evidence o
 **Instamart low days checked.** Instamart's 6 "low days" (Apr 25 – May 2) dip smoothly to ~30/day and recover
 by May 6, never zero. That's a real lull, not a collection cut.
 
+### LLM labelling run (later the same day)
+- Labelled the 300-review hand set (~3 min) and the 3,000-review training set (~45 min) with `qwen2.5:7b`.
+  0 failures/skips. Output: `data/labels/llm_labels_qwen2.5-7b.csv` (3,300 rows).
+- Speed fell from ~1.2 to ~0.8 reviews/s midway (likely thermal throttling on the laptop) and recovered to ~1.1/s.
+- Training-set theme counts (stratified sample, not population shares): positive 1,027 · refund_support 591 ·
+  other 425 · delivery_delay 319 · pricing_fees 319 · quality_expiry 278 · app_payment_bug 231 ·
+  missing_wrong_item 218 · partner_behaviour 159 · availability_stock 114. Every theme has ≥100 examples.
+- Sanity check on the hand set: `positive` was applied to only 2 of 164 reviews rated 1–2★, both genuinely positive text;
+  the extra positives come from mixed 3★ reviews. 16% of reviews got more than one theme.
+- The model was unloaded from Ollama after the run to let the laptop cool.
+
 ### Next
 - **Divya:** hand-label the 300 reviews (`uv run python -m qpulse.hand_label`, ~1–1.5 h); note any missing theme.
-- Run LLM labelling on the 3,000-review set (when the laptop is cool), then `qpulse.evaluate`.
+- Then `uv run python -m qpulse.evaluate data/labels/llm_labels_qwen2.5-7b.csv` → LLM accuracy vs hand labels; refine taxonomy.
 - Milestone 5 (SQL metrics + alerts) can start in parallel; it doesn't need the labels.
