@@ -228,10 +228,14 @@ the LLM labels at shifts -2…+2 was 8–13%, flat), so no offset explains it an
   #34 "can't deliver in my place" → delay (definition says availability), #52 "best app" → other, #54 "charge more
   than MRP" → refund only, #66 coupon praise → pricing only. The six flagged at 30 were not changed yet.
 
+- **11 of the 100 labels corrected after review.** Divya went through Claude's flags and approved all 11 changes
+  (#1, 5, 10, 11, 25, 28, 34, 52, 54, 66, 81); Claude applied them. Each changed row says so in its `note`
+  column, with the old label. Report as "100 hand labels, 11 corrected after a review pass" in the README.
+
 ### Next
 - **Open choice for reviews 101–300 (decide 2026-10-22):** continue fully by hand; Claude suggests + Divya
   confirms (logged per row and disclosed); or stop at 100 and report wider error bars. Claude will not write
   labels into `hand_labels.csv` itself.
-- **Divya:** re-check the flagged labels (`uv run python -m qpulse.hand_label --review 1`), then ~30/day
+- **Divya:** continue at ~30+/day
   (`uv run python -m qpulse.hand_label`), spot-check each batch, then run `qpulse.evaluate`.
 
