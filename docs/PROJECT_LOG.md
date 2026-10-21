@@ -12,7 +12,7 @@ Automatic daily collection runs aren't listed here; they're in `run_log.csv` in 
 |---|---|---|---|
 | 1 | Collector + 6-month backfill | 0.5 day | ✅ Done 2026-10-20 |
 | 2 | Data-quality report | 0.5 day | ✅ Done 2026-10-20 |
-| 3 | Theme labelling | 1 day | 🟡 LLM labelled 3,300 reviews; waiting on 300 hand labels + accuracy check |
+| 3 | Theme labelling | 1 day | 🟡 LLM labelled 3,300 reviews; hand labels 100/300 (restarted 2026-10-21 after two discarded attempts) |
 | 4 | Fast classifier | 0.5 day | ⬜ |
 | 5 | SQL metrics + expected-range alerts | 1 day | 🟡 Rating/volume metrics + alerts done; theme shares wired, need the classifier (M4) |
 | 6 | Weekly report | 0.5 day | ⬜ |
@@ -185,4 +185,53 @@ and adding themes needs no change to `alerts.sql`.
 - Milestone 4 (classifier) → write its output as `review_themes`, re-run `--calibrate` with themes, re-check k.
 - Milestone 6 adds version watch (rating / bug-theme share by app version) and the competitor view on top of
   `all_metrics`.
+
+## 2026-10-21: Hand labelling restarted
+
+### Work done
+- **Checked the first 101 hand labels** (`data/labels/hand_labels.csv`, done 2026-10-20). No blanks or gaps, but most
+  labels don't match their review text: "very good" → refund_support, "nice" → availability_stock, "great" →
+  pricing_fees, "6 minutes bol ke 47 minutes me delivery" → pricing_fees. Only 2 of 101 were tagged delivery_delay.
+- **Set the file aside** as `data/labels/hand_labels_discarded_2026-10-20.csv` (kept, not deleted). Labelling
+  restarts at 0/300.
+- **`src/qpulse/hand_label.py`:** now prints `saved: <themes>` after every review so a wrong entry is visible at
+  once; new `--review [N]` mode walks back through saved labels (Enter keeps, numbers replace).
+
+### Decisions
+**Label fully by hand, no suggestions.** Divya chose this over the model-assisted plan from 2026-10-20: the
+"accuracy vs hand labels" number is only meaningful if the labels are independent of any model.
+
+**Discard rather than repair the 101.** Tested whether the labels were shifted by one or two reviews (overlap with
+the LLM labels at shifts -2…+2 was 8–13%, flat), so no offset explains it and it can't be fixed automatically.
+
+### Failures and fixes
+- **Labels drifted from the reviews they belonged to.** Divya remembered pressing Enter on some reviews without a
+  theme. The tool rejects empty input and re-shows the same review, so if the screen wasn't watched the next
+  numbers could go to a review other than the one being read. The tool gave no confirmation of what was saved, so
+  nothing showed the drift. Caught by reading labels next to the text. Fix: the `saved:` echo after each review.
+  **Lesson: a labelling tool should always echo what it saved; spot-check the first 10 labels before doing the rest.**
+
+- **Second attempt also discarded.** A spot-check after 14 labels showed the same mismatch ("very good" →
+  app_payment_bug, "Very bad system of cancellation" → positive). Divya said the numbers were being picked freely
+  rather than from the text. Set aside as `data/labels/hand_labels_discarded_2026-10-21.csv`; restarted at 0/300
+  with Divya reading each review. **Lesson: the spot-check after the first 10–15 labels is what caught this; keep it.**
+
+- **Third attempt: 30/300 labelled, read from the text.** Spot-check: labels now follow the reviews ("6 minutes bol
+  ke 47 minutes" → delivery_delay, "no offers" → pricing_fees, expired face wash → quality_expiry). A few clashed with
+  the theme definitions and were flagged for Divya to decide on: #1 app not starting → missing_wrong_item, #5 not
+  available in village → missing_wrong_item, #10 poor customer service → partner_behaviour, #11 "good 👍" → other,
+  #25 praise for a delivery partner → partner_behaviour (a complaint theme), #28 surcharge + late → delay only.
+
+- **100/300 labelled.** Spot-check of 31–100: labels follow the text. Counts so far: positive 30, delivery_delay 24,
+  refund_support 19, pricing_fees 15, other 15, quality_expiry 10, missing_wrong_item 5, partner_behaviour 5,
+  availability_stock 2, app_payment_bug 1. Flagged for Divya: #81 has 8 of 10 themes ticked (likely typed 1–8),
+  #34 "can't deliver in my place" → delay (definition says availability), #52 "best app" → other, #54 "charge more
+  than MRP" → refund only, #66 coupon praise → pricing only. The six flagged at 30 were not changed yet.
+
+### Next
+- **Open choice for reviews 101–300 (decide 2026-10-22):** continue fully by hand; Claude suggests + Divya
+  confirms (logged per row and disclosed); or stop at 100 and report wider error bars. Claude will not write
+  labels into `hand_labels.csv` itself.
+- **Divya:** re-check the flagged labels (`uv run python -m qpulse.hand_label --review 1`), then ~30/day
+  (`uv run python -m qpulse.hand_label`), spot-check each batch, then run `qpulse.evaluate`.
 
