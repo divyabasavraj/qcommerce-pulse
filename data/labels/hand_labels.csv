@@ -53,7 +53,7 @@ f853c687-0279-432d-9104-12b6947b9071,1,0,0,0,0,0,0,0,0,0,
 393c7d5c-d81f-42d9-9936-c797b501a88f,0,0,0,0,0,0,0,0,1,0,changed after Claude review flag; approved by Divya; was other
 0c9d32a1-3471-4c78-ac57-c82e5b14e64a,0,0,0,1,0,0,0,0,0,0,
 38c968de-d7a0-4069-955c-316ec93e7ce0,0,0,0,0,1,0,0,0,0,0,changed after Claude review flag; approved by Divya; was refund_support
-1f4b9ebf-ae21-4363-a173-ae151fc97423,0,0,0,0,1,0,0,0,0,0,adjudicated after LLM comparison; removed delivery_delay (text names no delay); approved by Divya
+1f4b9ebf-ae21-4363-a173-ae151fc97423,0,1,0,1,0,0,0,0,0,0,"adjudicated after LLM comparison; approved by Divya; 4 items ordered, 3 delivered; support didn't respond; originally delivery_delay + pricing_fees"
 e12a44b0-184c-4d93-beec-478cf3608733,0,0,0,1,0,0,0,0,0,0,
 0652690b-5309-4e47-ae19-f5f3dddd397f,0,0,0,0,0,0,0,0,1,0,
 875dba11-da03-4371-a6c3-c0fda2119541,0,0,1,1,0,0,0,0,0,0,
@@ -88,7 +88,7 @@ ef799e93-b0c3-4dc5-b1fb-04e374c2e8f0,0,0,0,0,0,0,0,0,0,1,
 87b38e24-e625-440f-8f12-d969fa9f5c41,0,1,0,1,0,0,0,0,0,0,adjudicated after LLM comparison; removed delivery_delay (text names no delay); approved by Divya
 00e34794-ae68-42de-9269-58c194d13266,0,0,0,0,0,0,1,0,0,0,
 1bdd3f8f-9f0b-473b-8679-d5308f25b327,0,0,0,0,0,0,0,0,1,0,
-62773254-9672-4257-8773-9d623d701c6a,0,0,0,1,1,0,0,0,0,0,adjudicated after LLM comparison; removed delivery_delay (text names no delay); approved by Divya
+62773254-9672-4257-8773-9d623d701c6a,0,0,0,0,1,0,0,0,0,0,adjudicated after LLM comparison; approved by Divya; review is only about extra fees; originally delivery_delay + refund_support + pricing_fees
 47ed72b8-af68-4bd6-ad87-050163bf722b,0,0,0,0,0,0,0,0,1,0,
 c091fa03-c1aa-40cd-846b-935b999d504a,0,0,0,0,0,0,0,0,0,1,
 a359c303-98fb-493c-b0eb-b34b9c80729f,0,0,0,0,1,0,0,0,0,0,
