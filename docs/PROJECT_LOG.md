@@ -12,7 +12,7 @@ Automatic daily collection runs aren't listed here; they're in `run_log.csv` in 
 |---|---|---|---|
 | 1 | Collector + 6-month backfill | 0.5 day | ✅ Done 2026-10-20 |
 | 2 | Data-quality report | 0.5 day | ✅ Done 2026-10-20 |
-| 3 | Theme labelling | 1 day | 🟡 LLM labelled 3,300 reviews; hand labels 300/300 done 2026-10-24 (27 corrected after review); next: evaluate LLM vs hand labels |
+| 3 | Theme labelling | 1 day | 🟡 LLM labelled 3,300 reviews; hand labels 300/300 (27 corrected after review); LLM macro-F1 0.62 vs hand labels (2026-10-24) |
 | 4 | Fast classifier | 0.5 day | ⬜ |
 | 5 | SQL metrics + expected-range alerts | 1 day | 🟡 Rating/volume metrics + alerts done; theme shares wired, need the classifier (M4) |
 | 6 | Weekly report | 0.5 day | ⬜ |
@@ -267,7 +267,25 @@ the LLM labels at shifts -2…+2 was 8–13%, flat), so no offset explains it an
   memory. Caught by the `other`-plus-theme check and the short-review scan, not by reading every row.
   **Lesson: run these two checks after every batch.**
 
+- **LLM vs hand labels** (`uv run python -m qpulse.evaluate data/labels/llm_labels_qwen2.5-7b.csv` →
+  `docs/LABEL_EVAL.md`): **macro-F1 0.62 (95% CI 0.56–0.67)**, exact match 67%, at least one theme right 82%.
+  Best: positive 0.94, pricing_fees 0.76, quality_expiry 0.74. Worst: app_payment_bug 0.29, missing_wrong_item
+  0.43 (only 8 and 12 hand examples, so these F1s are very noisy).
+- **Added a bootstrap 95% CI for macro-F1** to `src/qpulse/evaluate.py` (1,000 resamples of reviews), so the
+  classifier in M4 gets the same interval.
+- **Where the LLM differs from Divya:** it under-calls delivery_delay (30 vs 53; precision 0.87, recall 0.49)
+  and over-calls refund_support (51 vs 36), app_payment_bug (22 vs 12) and partner_behaviour (20 vs 11).
+  It tags any mention of "customer service" as refund_support.
+- **By batch:** macro-F1 0.68 on reviews 1–100, 0.59 on 101–300. Could be the reviews or label noise in the
+  second batch; the planned self-consistency re-label will help tell.
+
+### Decisions
+- **Don't edit hand labels to match the model.** Some disagreements look like hand-label misses (e.g.
+  "sabse ghatiya customer service… 2 hours" has no refund_support in the hand labels), but changing labels
+  after seeing the model's answers would inflate the score. They stay as they are.
+
 ### Next
 - Report as "300 hand labels; 27 (9%) corrected after a review pass, each noted per row" in the README.
-- Run `qpulse.evaluate` (LLM vs hand labels) and write `LABEL_EVAL.md`.
+- Decide whether 0.62 is good enough as the classifier's training signal, or tighten the LLM prompt
+  (delivery_delay recall, "customer service" → refund_support) and re-run on the 3,000 training set.
 - In a week, Divya re-labels 30 random reviews blind to measure her own consistency.
