@@ -12,7 +12,7 @@ Automatic daily collection runs aren't listed here; they're in `run_log.csv` in 
 |---|---|---|---|
 | 1 | Collector + 6-month backfill | 0.5 day | ✅ Done 2026-10-20 |
 | 2 | Data-quality report | 0.5 day | ✅ Done 2026-10-20 |
-| 3 | Theme labelling | 1 day | 🟡 LLM labelled 3,300 reviews; hand labels 300/300 (27 corrected after review); LLM macro-F1 0.62 vs hand labels (2026-10-24) |
+| 3 | Theme labelling | 1 day | 🟡 LLM labelled 3,300 reviews; hand labels 300/300 (27 corrected after review); LLM prompt v2: macro-F1 0.60, exact 70% on held-out hand labels 101–300 (v1: 0.59, 66%) |
 | 4 | Fast classifier | 0.5 day | ⬜ |
 | 5 | SQL metrics + expected-range alerts | 1 day | 🟡 Rating/volume metrics + alerts done; theme shares wired, need the classifier (M4) |
 | 6 | Weekly report | 0.5 day | ⬜ |
@@ -279,13 +279,56 @@ the LLM labels at shifts -2…+2 was 8–13%, flat), so no offset explains it an
 - **By batch:** macro-F1 0.68 on reviews 1–100, 0.59 on 101–300. Could be the reviews or label noise in the
   second batch; the planned self-consistency re-label will help tell.
 
+- **Prompt v2** (`src/qpulse/llm_label.py`, `--prompt v2`; v1 kept with its original file names). Seven rules
+  added from the theme definitions: judge text not stars; generic anger → other; refund_support needs a
+  refund/return/cancel/support complaint; app_payment_bug only for technical faults; "not delivering to my
+  area" → availability_stock; app-cancelled / never-delivered → delivery_delay; referral/coupon → pricing_fees.
+  Rules written from disagreements on **reviews 1–100 only**; 101–300 held out.
+- **v1 vs v2** (`data/labels/llm_labels_qwen2.5-7b-v2.csv`, 300 reviews in 2.5 min at ~1.9/s):
+
+  | Set | v1 macro-F1 | v2 macro-F1 | v1 exact | v2 exact |
+  |---|---|---|---|---|
+  | Tuning 1–100 | 0.68 | 0.75 | 71% | 74% |
+  | **Held-out 101–300** | **0.59** | **0.60** | **66%** | **70%** |
+
+  Paired bootstrap on held-out: exact match +4 pts (95% CI +1 to +8), macro-F1 +0.01 (−0.03 to +0.05, noise).
+  10 held-out reviews became exactly right, 2 stopped being. The tuning-set jump (+0.07) is mostly fit to
+  those 100 reviews; the held-out number is the one to quote. `docs/LABEL_EVAL.md` now shows v2 on all 300.
+- **Re-labelled the 3,000-review training set with v2** for the M4 classifier: 3,000/3,000, no skips, ~40 min
+  (1.25/s, slower than the 1.9/s on the hand set). 13.9% of training reviews changed labels vs v1. Biggest shifts:
+  pricing_fees 319 → 367, positive 1,027 → 1,081, app_payment_bug 231 → 194, partner_behaviour 159 → 128,
+  other 425 → 383. `data/labels/llm_labels_qwen2.5-7b-v2.csv` now has 3,300 rows (hand set + training set).
+- **Adjudicated 8 hand labels** (#55, 61, 69, 86, 87, 90, 95, 100): removed `delivery_delay` only; none of the
+  texts names a delay. Divya asked Claude to apply this. Each row's note says "adjudicated after LLM comparison".
+  Nothing was added from the model's answers. Scores, original → adjudicated labels:
+
+  | | 1–100 | Held-out 101–300 | All 300 | delivery_delay recall |
+  |---|---|---|---|---|
+  | v1 | 0.68 → 0.69 | 0.59 → 0.59 | 0.62 → 0.62 | 0.49 → 0.58 |
+  | v2 | 0.75 → 0.77 | 0.60 → 0.60 | 0.64 → 0.65 | 0.53 → 0.62 |
+
+  Macro-F1. The held-out score doesn't move because all 8 rows are in the tuning set.
+- **Adjudicated #55 and #90 further** at Divya's request: #55 pricing_fees → missing_wrong_item + refund_support
+  (4 items ordered, 3 delivered, support didn't respond); #90 refund_support + pricing_fees → pricing_fees (review
+  is only about fees). Both now match the v2 model fully (#90) or partly (#55). All 300 with v2: macro-F1 0.66,
+  exact 72%. Held-out 101–300 unchanged at 0.60 / 70%.
+
 ### Decisions
-- **Don't edit hand labels to match the model.** Some disagreements look like hand-label misses (e.g.
+- **Tune on 1–100, score on 101–300.** Reason: rules written from the same reviews they are scored on would
+  overstate the gain. Caveat: the v1 report's "first 15 disagreements" list (sorted by review ID) included some
+  101–300 reviews, so the held-out set isn't perfectly unseen; the rules are general, not copied from those.
+- **Did not push the prompt toward more delivery_delay.** Most "missed" delays in 1–100 (#55, 61, 69, 86, 87,
+  90, 95, 100) are hand labels with delivery_delay on reviews that don't mention a delay, the same `1`-key habit
+  found in 101–300. Raising model recall there would fit label errors.
+- **Adjudicated labels are kept separate from review corrections.** Fixing only rows where the model disagrees
+  can only raise the model's score, so these 8 are labelled as adjudicated and both scores are reported.
+  The held-out 101–300 number is unaffected and stays the headline.
+- **Otherwise, don't edit hand labels to match the model.** Some disagreements look like hand-label misses (e.g.
   "sabse ghatiya customer service… 2 hours" has no refund_support in the hand labels), but changing labels
   after seeing the model's answers would inflate the score. They stay as they are.
 
 ### Next
-- Report as "300 hand labels; 27 (9%) corrected after a review pass, each noted per row" in the README.
-- Decide whether 0.62 is good enough as the classifier's training signal, or tighten the LLM prompt
-  (delivery_delay recall, "customer service" → refund_support) and re-run on the 3,000 training set.
+- Report in the README as "300 hand labels; 27 corrected after a review pass, 8 more adjudicated after comparing
+  with the LLM (delivery_delay removed; #55 and #90 fully relabelled), each noted per row".
+- M4: train the fast classifier on the v2 training labels; score on held-out hand labels 101–300.
 - In a week, Divya re-labels 30 random reviews blind to measure her own consistency.
