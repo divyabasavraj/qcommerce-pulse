@@ -12,7 +12,7 @@ Automatic daily collection runs aren't listed here; they're in `run_log.csv` in 
 |---|---|---|---|
 | 1 | Collector + 6-month backfill | 0.5 day | ✅ Done 2026-10-20 |
 | 2 | Data-quality report | 0.5 day | ✅ Done 2026-10-20 |
-| 3 | Theme labelling | 1 day | 🟡 LLM labelled 3,300 reviews; hand labels 100/300 (restarted 2026-10-21 after two discarded attempts) |
+| 3 | Theme labelling | 1 day | 🟡 LLM labelled 3,300 reviews; hand labels 300/300 done 2026-10-24 (27 corrected after review); next: evaluate LLM vs hand labels |
 | 4 | Fast classifier | 0.5 day | ⬜ |
 | 5 | SQL metrics + expected-range alerts | 1 day | 🟡 Rating/volume metrics + alerts done; theme shares wired, need the classifier (M4) |
 | 6 | Weekly report | 0.5 day | ⬜ |
@@ -22,7 +22,7 @@ Automatic daily collection runs aren't listed here; they're in `run_log.csv` in 
 
 **Open decisions (from PLAN.md §17):**
 - [x] Swiggy Instamart app ID → standalone app `in.swiggy.android.instamart` (2026-10-20)
-- [ ] Number of hand labels (300 drawn; confirm after labelling)
+- [x] Number of hand labels → 300, all labelled by hand (2026-10-24)
 - [x] Alert sensitivity → k = 2.5 × SD of an 8-week baseline, min 200 reviews/week (2026-10-20; re-check with theme metrics)
 - [ ] Dashboard: Streamlit vs Looker Studio
 
@@ -239,3 +239,35 @@ the LLM labels at shifts -2…+2 was 8–13%, flat), so no offset explains it an
 - **Divya:** continue at ~30+/day
   (`uv run python -m qpulse.hand_label`), spot-check each batch, then run `qpulse.evaluate`.
 
+
+## 2026-10-24: Hand labels 300/300
+
+### Work done
+- **Divya labelled reviews 101–300 by hand** in `src/qpulse/hand_label.py`. Committed as-is first (`f56f87a`) so
+  the history keeps the unreviewed labels.
+- **Checks on `data/labels/hand_labels.csv`:** 300 rows, 300 unique IDs matching `hand_label_set.csv`, no row
+  without a theme, only 0/1 values, first 100 identical to the committed version. `positive` is on 97% of 5★
+  and 4% of 1★ reviews.
+- **Flagged 16 of reviews 101–300** for Divya: 13 had `other` ticked alongside other themes, and a scan of
+  short reviews (≤4 words) found vague text given specific themes. Common pattern: `delivery_delay +
+  missing_wrong_item` on reviews that mention neither ("bad", "very bad service", "faltu company hai").
+  Reviews with 3+ themes had gone from 4 in 1–100 to 20 in 101–300.
+- **16 labels corrected** (#124, 126, 149, 151, 159, 160, 178, 195, 197, 217, 223, 226, 232, 242, 256, 294).
+  Divya asked Claude to apply the fixes Claude had proposed. Each row's `note` says
+  "changed after Claude review flag; approved by Divya; was <old labels>". 9 vague reviews → `other`;
+  support complaints → `refund_support`; "not available in city" → `availability_stock`. 3+ theme rows now 11.
+
+### Decisions
+- **Vague complaints ("bad", "very bad service") are `other`**, as the theme definition says, even when 1★.
+  Reason: a specific theme needs the text to name the problem; guessing would inflate those themes.
+- **Commit before corrections**, so the change from Divya's own labels to reviewed labels is visible in git.
+
+### Failures and fixes
+- **Batch 101–300 had a habit error:** the same `1 2` (+10) pairing on vague reviews, likely typed from muscle
+  memory. Caught by the `other`-plus-theme check and the short-review scan, not by reading every row.
+  **Lesson: run these two checks after every batch.**
+
+### Next
+- Report as "300 hand labels; 27 (9%) corrected after a review pass, each noted per row" in the README.
+- Run `qpulse.evaluate` (LLM vs hand labels) and write `LABEL_EVAL.md`.
+- In a week, Divya re-labels 30 random reviews blind to measure her own consistency.
