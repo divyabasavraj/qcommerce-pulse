@@ -53,13 +53,13 @@ f853c687-0279-432d-9104-12b6947b9071,1,0,0,0,0,0,0,0,0,0,
 393c7d5c-d81f-42d9-9936-c797b501a88f,0,0,0,0,0,0,0,0,1,0,changed after Claude review flag; approved by Divya; was other
 0c9d32a1-3471-4c78-ac57-c82e5b14e64a,0,0,0,1,0,0,0,0,0,0,
 38c968de-d7a0-4069-955c-316ec93e7ce0,0,0,0,0,1,0,0,0,0,0,changed after Claude review flag; approved by Divya; was refund_support
-1f4b9ebf-ae21-4363-a173-ae151fc97423,1,0,0,0,1,0,0,0,0,0,
+1f4b9ebf-ae21-4363-a173-ae151fc97423,0,0,0,0,1,0,0,0,0,0,adjudicated after LLM comparison; removed delivery_delay (text names no delay); approved by Divya
 e12a44b0-184c-4d93-beec-478cf3608733,0,0,0,1,0,0,0,0,0,0,
 0652690b-5309-4e47-ae19-f5f3dddd397f,0,0,0,0,0,0,0,0,1,0,
 875dba11-da03-4371-a6c3-c0fda2119541,0,0,1,1,0,0,0,0,0,0,
 bedb4ecd-7372-46db-8d8c-f529403408bf,0,0,0,0,0,0,0,0,1,0,
 79cdcb33-611d-45f6-ba3d-eb1ee620be2e,0,0,0,0,0,0,0,0,1,0,
-fb19fc5d-7147-4a10-9874-dbc4d97f088a,1,1,0,0,0,0,0,0,0,0,
+fb19fc5d-7147-4a10-9874-dbc4d97f088a,0,1,0,0,0,0,0,0,0,0,adjudicated after LLM comparison; removed delivery_delay (text names no delay); approved by Divya
 908055a4-a0f2-4e77-b99f-788ef6b3479f,0,0,0,1,0,0,0,0,0,0,
 7fbe2a69-c1f7-4029-8a94-ce823d10c00e,0,0,1,1,0,0,0,0,0,0,
 eb4f0be2-28c7-40a0-8c2b-bd8d546098aa,0,0,0,0,0,0,0,0,0,1,
@@ -67,7 +67,7 @@ eb4f0be2-28c7-40a0-8c2b-bd8d546098aa,0,0,0,0,0,0,0,0,0,1,
 0a8d90aa-7c2d-4be4-ace0-4a16ce32af00,0,0,0,0,0,0,0,0,1,0,changed after Claude review flag; approved by Divya; was pricing_fees
 95ff16ba-bb97-4c11-8adf-b82273510864,1,0,0,0,0,0,0,0,0,0,
 ee092869-6fd1-43bd-9cc7-c4a78562bd7c,0,0,0,0,1,0,0,0,0,0,
-4e3695aa-443e-4b84-ae05-82677b9e2cc2,1,0,0,1,0,0,0,0,0,0,
+4e3695aa-443e-4b84-ae05-82677b9e2cc2,0,0,0,1,0,0,0,0,0,0,adjudicated after LLM comparison; removed delivery_delay (text names no delay); approved by Divya
 10dd8b03-4e0b-43fd-87e6-f9b63870a5ea,0,0,0,0,0,0,0,0,1,0,
 a20f2ac6-d8b3-4c2a-988a-7c75304c8842,0,0,0,0,0,0,0,0,1,0,
 b6b13fd4-7dd1-47cd-920c-77112561ed64,0,0,1,0,0,0,0,0,0,0,
@@ -84,21 +84,21 @@ ef799e93-b0c3-4dc5-b1fb-04e374c2e8f0,0,0,0,0,0,0,0,0,0,1,
 8805277a-8bb1-46d8-86c4-88aa57e15c8e,1,0,0,0,0,0,0,0,0,0,
 19dc36a2-fb11-4cd8-b608-4f761a5f0f44,0,0,0,0,0,0,0,0,0,1,
 891cdb05-ae8a-4e0b-9816-a0e39dd8485f,0,0,0,0,1,0,0,0,0,0,
-6de45718-d6b1-45e7-bc5c-83e9f7ca8aa7,1,0,0,1,1,0,0,0,0,0,
-87b38e24-e625-440f-8f12-d969fa9f5c41,1,1,0,1,0,0,0,0,0,0,
+6de45718-d6b1-45e7-bc5c-83e9f7ca8aa7,0,0,0,1,1,0,0,0,0,0,adjudicated after LLM comparison; removed delivery_delay (text names no delay); approved by Divya
+87b38e24-e625-440f-8f12-d969fa9f5c41,0,1,0,1,0,0,0,0,0,0,adjudicated after LLM comparison; removed delivery_delay (text names no delay); approved by Divya
 00e34794-ae68-42de-9269-58c194d13266,0,0,0,0,0,0,1,0,0,0,
 1bdd3f8f-9f0b-473b-8679-d5308f25b327,0,0,0,0,0,0,0,0,1,0,
-62773254-9672-4257-8773-9d623d701c6a,1,0,0,1,1,0,0,0,0,0,
+62773254-9672-4257-8773-9d623d701c6a,0,0,0,1,1,0,0,0,0,0,adjudicated after LLM comparison; removed delivery_delay (text names no delay); approved by Divya
 47ed72b8-af68-4bd6-ad87-050163bf722b,0,0,0,0,0,0,0,0,1,0,
 c091fa03-c1aa-40cd-846b-935b999d504a,0,0,0,0,0,0,0,0,0,1,
 a359c303-98fb-493c-b0eb-b34b9c80729f,0,0,0,0,1,0,0,0,0,0,
 135e335e-badf-46da-9c3b-07e168996223,0,0,1,1,0,0,0,0,0,0,
-01cd3c18-3828-4e47-bced-3cb62d575e64,1,0,1,1,0,0,0,0,0,0,
+01cd3c18-3828-4e47-bced-3cb62d575e64,0,0,1,1,0,0,0,0,0,0,adjudicated after LLM comparison; removed delivery_delay (text names no delay); approved by Divya
 1dc72067-b1db-4238-b75a-b4f71c809864,0,0,1,1,0,0,0,0,0,0,
 253275d7-fd2c-4923-8c30-63447315319f,1,0,0,0,0,0,0,0,0,0,
 cf7ba7bb-61a3-4d57-a25c-2dacde495e4b,0,0,0,0,0,0,0,0,1,0,
 0e389e83-65b0-46fa-9793-c1952cd5c709,0,0,1,0,0,0,0,0,0,0,
-211a1337-4076-4fb7-8ac2-3de166e0f4a4,1,0,0,1,0,0,0,0,0,0,
+211a1337-4076-4fb7-8ac2-3de166e0f4a4,0,0,0,1,0,0,0,0,0,0,adjudicated after LLM comparison; removed delivery_delay (text names no delay); approved by Divya
 4fb189cf-7520-4274-b4e0-98cd32ee0068,0,0,0,0,0,0,0,0,1,0,
 fb462a01-3a86-44b2-8ab5-218cec93fb87,0,0,1,0,0,0,0,0,0,0,
 479f4751-0f2d-4ecc-9cac-45ac6bf53a04,0,0,0,0,0,0,0,0,1,0,
