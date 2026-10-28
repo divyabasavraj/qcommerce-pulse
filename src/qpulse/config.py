@@ -31,3 +31,8 @@ METRICS_START = "2026-05-11"
 BASELINE_WEEKS = 8
 ALERT_K = 3.0
 ALERT_MIN_N = 200
+# Version watch: a version needs this many reviews with text in the week to be judged.
+VERSION_MIN_N = 100
+
+# Weekly report text: small local model so it can run in CI (Ollama on the GitHub runner).
+REPORT_MODEL = "qwen2.5:3b"

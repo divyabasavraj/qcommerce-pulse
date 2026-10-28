@@ -1,0 +1,20 @@
+{
+  "week": "2026-10-05",
+  "reviews": 13476,
+  "actions": [],
+  "summary_source": "qwen2.5:3b, fact check passed first time",
+  "summary": "This week, Blinkit's 1\u2605 share was inside its expected range at 14.3%, and its average rating was 4.16, within its normal range of 4.02 to 4.17. No actions are needed as both metrics are within their expected ranges.",
+  "facts": [
+    "13,476 reviews across the 4 apps this week.",
+    "No actions this week: nothing is worse than its expected range.",
+    "Blinkit 1\u2605 share was 14.3% against a normal 16.0%; inside the expected range of 14.3% to 17.7% (normal variation, no action).",
+    "Blinkit average rating was 4.16 against a normal 4.09; inside the expected range of 4.02 to 4.17 (normal variation, no action)."
+  ],
+  "llm_attempts": [
+    {
+      "text": "This week, Blinkit's 1\u2605 share was inside its expected range at 14.3%, and its average rating was 4.16, within its normal range of 4.02 to 4.17. No actions are needed as both metrics are within their expected ranges.",
+      "problems": []
+    }
+  ],
+  "followup": []
+}

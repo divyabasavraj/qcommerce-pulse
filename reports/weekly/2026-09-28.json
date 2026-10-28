@@ -1,0 +1,32 @@
+{
+  "week": "2026-09-28",
+  "reviews": 14101,
+  "actions": [],
+  "summary_source": "template: qwen2.5:3b failed the fact check twice",
+  "summary": "A normal week: no metric is outside its expected range in the bad direction. The largest move was Blinkit's 1\u2605 share at 14.8% against a normal 16.1%.",
+  "facts": [
+    "14,101 reviews across the 4 apps this week.",
+    "No actions this week: nothing is worse than its expected range.",
+    "Blinkit average rating was 4.14 against a normal 4.09; outside the expected range of 4.04 to 4.14 (better than normal).",
+    "Blinkit 1\u2605 share was 14.8% against a normal 16.1%; outside the expected range of 15.0% to 17.2% (better than normal).",
+    "Zepto 1\u2605 share was 35.3% against a normal 39.0%; inside the expected range of 35.0% to 42.9% (normal variation, no action).",
+    "Zepto refund / support was 18.1% against a normal 21.0%; inside the expected range of 17.8% to 24.2% (normal variation, no action)."
+  ],
+  "llm_attempts": [
+    {
+      "text": "This week, Blinkit's average rating is 4.14, outside its expected range of 4.04 to 4.14, indicating customer satisfaction is better than normal. Focus on improving the 1\u2605 share to below 16.1% to bring it back within its expected range. No other actions are needed as all other metrics are within their expected ranges.",
+      "problems": [
+        "\"16.1\" belongs to a different app than the one named in: \"Focus on improving the 1\u2605 share to below 16.1% to bring it back within its expected range.\""
+      ]
+    },
+    {
+      "text": "This week, Blinkit's average rating is 4.14, outside its expected range of 4.04 to 4.14, indicating customer satisfaction is better than normal. Focus on improving the 1\u2605 share to below 35.3% to bring it back within its expected range of 35.0% to 42.9%. No other actions are needed as all other metrics are within their expected ranges.",
+      "problems": [
+        "\"35.0\" belongs to a different app than the one named in: \"Focus on improving the 1\u2605 share to below 35.3% to bring it back within its expected range of 35.0% to 42.9%.\"",
+        "\"35.3\" belongs to a different app than the one named in: \"Focus on improving the 1\u2605 share to below 35.3% to bring it back within its expected range of 35.0% to 42.9%.\"",
+        "\"42.9\" belongs to a different app than the one named in: \"Focus on improving the 1\u2605 share to below 35.3% to bring it back within its expected range of 35.0% to 42.9%.\""
+      ]
+    }
+  ],
+  "followup": null
+}

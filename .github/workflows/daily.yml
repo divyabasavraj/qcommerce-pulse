@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: "30 1 * * *"   # 07:00 IST
   workflow_dispatch:
+    inputs:
+      weekly_report:
+        description: "Also write the weekly report (normally Mondays only)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -45,3 +50,28 @@ jobs:
           gh release upload data data/raw/reviews_*.parquet --clobber
           gh release upload data data/run_log.csv --clobber
           if [ -f data/themes.parquet ]; then gh release upload data data/themes.parquet --clobber; fi
+
+      # Weekly report: Mondays (IST), after collection so last week's Sunday is complete.
+      - name: Is it Monday?
+        id: day
+        run: echo "monday=$([ "$(TZ=Asia/Kolkata date +%u)" = 1 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+      - name: Start Ollama with the report model
+        if: steps.day.outputs.monday == 'true' || inputs.weekly_report
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sh
+          (ollama serve > /tmp/ollama.log 2>&1 &) || true
+          until curl -sf http://localhost:11434/api/version > /dev/null; do sleep 1; done
+          ollama pull "$(uv run python -c 'from qpulse.config import REPORT_MODEL; print(REPORT_MODEL)')"
+
+      - name: Write and commit the weekly report
+        if: steps.day.outputs.monday == 'true' || inputs.weekly_report
+        run: |
+          uv run python -m qpulse.weekly --skip-existing
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/weekly
+          if git diff --cached --quiet; then echo "no new report"; exit 0; fi
+          git commit -m "Weekly report: week of $(ls reports/weekly/*.md | sort | tail -1 | xargs basename -s .md)"
+          git pull --rebase origin main
+          git push origin HEAD:main

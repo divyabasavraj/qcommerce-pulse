@@ -1,0 +1,20 @@
+{
+  "week": "2026-10-12",
+  "reviews": 12780,
+  "actions": [],
+  "summary_source": "qwen2.5:3b, fact check passed first time",
+  "summary": "This week, Blinkit partner behavior was 1.1% within the expected range, and BigBasket had 2.6% missing or wrong items, also within the expected range. No actions are needed as both metrics are within their normal variation.",
+  "facts": [
+    "12,780 reviews across the 4 apps this week.",
+    "No actions this week: nothing is worse than its expected range.",
+    "Blinkit partner behaviour was 1.1% against a normal 1.5%; inside the expected range of 1.1% to 1.9% (normal variation, no action).",
+    "BigBasket missing / wrong item was 2.6% against a normal 1.5%; inside the expected range of 0.3% to 2.7% (normal variation, no action)."
+  ],
+  "llm_attempts": [
+    {
+      "text": "This week, Blinkit partner behavior was 1.1% within the expected range, and BigBasket had 2.6% missing or wrong items, also within the expected range. No actions are needed as both metrics are within their normal variation.",
+      "problems": []
+    }
+  ],
+  "followup": []
+}
