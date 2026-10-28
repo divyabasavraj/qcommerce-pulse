@@ -14,7 +14,7 @@ Automatic daily collection runs aren't listed here; they're in `run_log.csv` in 
 | 2 | Data-quality report | 0.5 day | ✅ Done 2026-10-20 |
 | 3 | Theme labelling | 1 day | 🟡 LLM labelled 3,300 reviews; hand labels 300/300 (27 corrected after review); LLM prompt v2: macro-F1 0.60, exact 70% on held-out hand labels 101–300 (v1: 0.59, 66%) |
 | 4 | Fast classifier | 0.5 day | ✅ Done 2026-10-28: TF-IDF + logistic regression, held-out macro-F1 0.59 (LLM 0.60), all 370k reviews in 10 s; in the daily job (not yet run in CI) |
-| 5 | SQL metrics + expected-range alerts | 1 day | 🟡 Rating/volume + theme-share metrics and alerts run; alert width needs re-deciding (2.5 alerts/week with themes) |
+| 5 | SQL metrics + expected-range alerts | 1 day | ✅ Done 2026-10-28: rating, volume and theme-share metrics; alerts at k = 3 (0.7/week in backtest) |
 | 6 | Weekly report | 0.5 day | ⬜ |
 | 7 | Monthly memo + Diwali deep-dive | 1 day | ⬜ Diwali analysis needs data from after Nov 8 |
 | 8 | Dashboard | 0.5 day | ⬜ |
@@ -23,7 +23,7 @@ Automatic daily collection runs aren't listed here; they're in `run_log.csv` in 
 **Open decisions (from PLAN.md §17):**
 - [x] Swiggy Instamart app ID → standalone app `in.swiggy.android.instamart` (2026-10-20)
 - [x] Number of hand labels → 300, all labelled by hand (2026-10-24)
-- [ ] Alert sensitivity with theme metrics: k = 2.5 now gives 2.5 alerts/week (was 0.8 without themes); k = 3 gives 0.7. Was k = 2.5 × SD of an 8-week baseline, min 200 reviews/week (2026-10-20)
+- [x] Alert sensitivity → k = 3 × SD of an 8-week baseline, min 200 reviews/week (2026-10-28, with theme metrics; was 2.5 from 2026-10-20)
 - [ ] Dashboard: Streamlit vs Looker Studio
 
 ---
@@ -395,9 +395,18 @@ the LLM labels at shifts -2…+2 was 8–13%, flat), so no offset explains it an
   Caught by running it twice locally; it now returns early. Tested all three paths: full (370,006), none (0),
   incremental (500).
 
+- **Alert width set to k = 3** (`ALERT_K` in `src/qpulse/config.py`), regenerated `docs/ALERT_CALIBRATION.md`
+  with theme metrics and new reasoning. Backtest: 11 alerts in 15 weeks (0.7/week; 5 worse, 5 better, 1 volume),
+  8 of them theme shares. Latest full week in local data (w/c Oct 12): 0 alerts (5 at k = 2.5).
+
+### Decisions (continued)
+- **k = 3 for all metrics (Divya's call).** Reason: at k = 2.5 the theme series push alerts to ~2.5/week, more
+  than a weekly report with room for 2–3 actions can carry. Cost, from the k = 2.5 backtest: misses BigBasket's
+  1★ jump (w/c Aug 10, z = 2.8) and the second week of Blinkit's rating improvement (Oct 5); the first week
+  (Sep 28) is still caught by both rating metrics. Not chosen: a separate k for theme shares (one more knob to
+  justify).
+
 ### Next
 - Push and trigger one manual run of the daily workflow to confirm the classify step and `themes.parquet` upload.
-- Decide alert width with theme metrics (k = 2.5 at 2.5/week vs k = 3 at 0.7/week, or a different k for theme
-  shares), then regenerate `docs/ALERT_CALIBRATION.md` with the new reasoning.
 - M6 weekly report.
 

@@ -29,5 +29,5 @@ METRICS_START = "2026-05-11"
 # Expected-range alerts: baseline weeks, range width in standard deviations, minimum reviews in the week.
 # Width and minimum chosen from the backtest in docs/ALERT_CALIBRATION.md.
 BASELINE_WEEKS = 8
-ALERT_K = 2.5
+ALERT_K = 3.0
 ALERT_MIN_N = 200

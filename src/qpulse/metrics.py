@@ -124,12 +124,13 @@ weeks only serve as baseline.
 
 {md_table(pd.DataFrame(rows))}
 
-Chosen: **k = {ALERT_K}**. The weekly report has room for 2-3 actions, so the alert list must stay short.
-k = 2 flags ~15% of metric-weeks, far above the ~5% normal noise would give: the SD of only {BASELINE_WEEKS}
-weekly values is itself noisy, so the range is often too narrow. k = 3 misses events that read as real
-when checked (Blinkit's rating improving two weeks running, caught by both rating metrics; a BigBasket 1★
-jump). k = 2.5 keeps those at under one alert a week. Re-check once theme metrics are added: they add
-~10 series per app, roughly 4× the alert count.
+Chosen: **k = {ALERT_K}** (2026-10-28; was 2.5). The weekly report has room for 2-3 actions, so the alert list
+must stay short. With rating and volume metrics only, k = 2.5 gave under one alert a week. Theme shares add
+~10 series per app, and k = 2.5 then gives about 2.5 a week, more than the report can act on. k = 3 brings it
+back under one a week. Cost, from the k = 2.5 backtest: it misses BigBasket's 1★ jump (week of Aug 10, z = 2.8)
+and the second week of Blinkit's rating improvement (Oct 5); the first week (Sep 28) is still caught by both
+rating metrics. k = 2 flags ~11% of metric-weeks: the SD of only {BASELINE_WEEKS} weekly values is itself noisy, so the
+range is often too narrow.
 
 ## Alerts at k = {ALERT_K}
 
