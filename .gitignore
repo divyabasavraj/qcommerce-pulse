@@ -8,3 +8,4 @@ data/*.duckdb
 data/*.duckdb.wal
 data/labels/llm_cache/
 data/run_log.csv
+data/themes.parquet

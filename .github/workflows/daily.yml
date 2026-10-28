@@ -31,12 +31,17 @@ jobs:
           gh release view data >/dev/null 2>&1 || gh release create data --title "Review data" --notes "Monthly Parquet files, updated daily by CI."
           gh release download data --dir data/raw --pattern "reviews_*.parquet" --clobber || true
           gh release download data --dir data --pattern "run_log.csv" --clobber || true
+          gh release download data --dir data --pattern "themes.parquet" --clobber || true
 
       - name: Collect new reviews
         run: uv run python -m qpulse.collect
+
+      - name: Label themes of new reviews
+        run: uv run python -m qpulse.classify
 
       - name: Upload updated files to the data release
         if: always()
         run: |
           gh release upload data data/raw/reviews_*.parquet --clobber
           gh release upload data data/run_log.csv --clobber
+          if [ -f data/themes.parquet ]; then gh release upload data data/themes.parquet --clobber; fi

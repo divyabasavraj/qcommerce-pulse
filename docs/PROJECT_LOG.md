@@ -13,8 +13,8 @@ Automatic daily collection runs aren't listed here; they're in `run_log.csv` in 
 | 1 | Collector + 6-month backfill | 0.5 day | ✅ Done 2026-10-20 |
 | 2 | Data-quality report | 0.5 day | ✅ Done 2026-10-20 |
 | 3 | Theme labelling | 1 day | 🟡 LLM labelled 3,300 reviews; hand labels 300/300 (27 corrected after review); LLM prompt v2: macro-F1 0.60, exact 70% on held-out hand labels 101–300 (v1: 0.59, 66%) |
-| 4 | Fast classifier | 0.5 day | ⬜ |
-| 5 | SQL metrics + expected-range alerts | 1 day | 🟡 Rating/volume metrics + alerts done; theme shares wired, need the classifier (M4) |
+| 4 | Fast classifier | 0.5 day | ✅ Done 2026-10-28: TF-IDF + logistic regression, held-out macro-F1 0.59 (LLM 0.60), all 370k reviews in 10 s; in the daily job (not yet run in CI) |
+| 5 | SQL metrics + expected-range alerts | 1 day | 🟡 Rating/volume + theme-share metrics and alerts run; alert width needs re-deciding (2.5 alerts/week with themes) |
 | 6 | Weekly report | 0.5 day | ⬜ |
 | 7 | Monthly memo + Diwali deep-dive | 1 day | ⬜ Diwali analysis needs data from after Nov 8 |
 | 8 | Dashboard | 0.5 day | ⬜ |
@@ -23,7 +23,7 @@ Automatic daily collection runs aren't listed here; they're in `run_log.csv` in 
 **Open decisions (from PLAN.md §17):**
 - [x] Swiggy Instamart app ID → standalone app `in.swiggy.android.instamart` (2026-10-20)
 - [x] Number of hand labels → 300, all labelled by hand (2026-10-24)
-- [x] Alert sensitivity → k = 2.5 × SD of an 8-week baseline, min 200 reviews/week (2026-10-20; re-check with theme metrics)
+- [ ] Alert sensitivity with theme metrics: k = 2.5 now gives 2.5 alerts/week (was 0.8 without themes); k = 3 gives 0.7. Was k = 2.5 × SD of an 8-week baseline, min 200 reviews/week (2026-10-20)
 - [ ] Dashboard: Streamlit vs Looker Studio
 
 ---
@@ -332,3 +332,72 @@ the LLM labels at shifts -2…+2 was 8–13%, flat), so no offset explains it an
   with the LLM (delivery_delay removed; #55 and #90 fully relabelled), each noted per row".
 - M4: train the fast classifier on the v2 training labels; score on held-out hand labels 101–300.
 - In a week, Divya re-labels 30 random reviews blind to measure her own consistency.
+
+---
+
+## 2026-10-28: Milestone 4, fast theme classifier
+
+### Work done
+- **Pushed** the 8 commits from 2026-10-21 to 2026-10-24 to GitHub (`ee7d34b..215d1c7`).
+- **Compared four classifiers** (one logistic regression per theme, balanced class weights), all trained on the
+  3,000 LLM v2 training labels. C and threshold were picked on hand labels 1–100. Best tuning macro-F1 per feature set:
+
+  | Features | Best tuning macro-F1 (1–100) | Speed |
+  |---|---|---|
+  | **TF-IDF word 1–2-grams + char 2–5-grams** | **0.713** (C = 10, threshold 0.7) | ~20,000 reviews/s |
+  | TF-IDF + multilingual MiniLM-L12 embeddings | 0.690 | ~70 reviews/s (embedding) |
+  | paraphrase-multilingual-mpnet-base-v2 embeddings | 0.613 | ~44 reviews/s |
+  | paraphrase-multilingual-MiniLM-L12-v2 embeddings | 0.652 | ~75 reviews/s |
+
+  Embeddings via `fastembed` (ONNX, CPU). TF-IDF won on score and speed, so `fastembed` was removed again.
+- **`src/qpulse/classify.py`**: retrains from the label files in git on every run (a few seconds) and labels any
+  review not yet in `data/themes.parquet`. A review with no theme over the threshold gets its most likely theme,
+  like the hand labels, where every review has at least one. `--rebuild` re-labels everything; `--evaluate` writes `docs/CLASSIFIER_EVAL.md`.
+- **Held-out score (hand labels 101–300, 200 reviews):** classifier macro-F1 **0.59** (95% CI 0.50–0.66), exact
+  match 66%; its teacher, the LLM v2, scores 0.60 (0.52–0.68) and 70%. Paired bootstrap difference −0.01
+  (−0.07 to +0.05): no measurable loss. Weakest themes: partner_behaviour F1 0.29 (9 reviews), availability_stock
+  0.42, app_payment_bug 0.46. Better than the LLM on app_payment_bug, missing_wrong_item, pricing_fees.
+- **Labelled all 370,006 reviews in 10 s** → `data/themes.parquet` (gitignored; lives in the `data` release).
+  Shares: positive 67.9%, other 9.4%, refund_support 6.8%, pricing_fees 6.2%, delivery_delay 4.8%,
+  quality_expiry 3.8%, app_payment_bug 2.2%, missing_wrong_item 2.0%, partner_behaviour 1.6%, availability_stock 1.6%.
+- **Daily job** (`.github/workflows/daily.yml`): downloads `themes.parquet` from the release, runs
+  `qpulse.classify` after collection, uploads it back. Not yet run in CI.
+- **Metrics** (`src/qpulse/metrics.py`): uses `data/themes.parquet` by default when present; `--themes` also takes
+  `.parquet`. Latest full week in local data (w/c Oct 12): 5 alerts, all theme shares (BigBasket missing/wrong
+  items and quality worse; Blinkit positive up, partner_behaviour down; Zepto availability_stock down).
+- **Re-ran the alert backtest with theme metrics** (52 series instead of 12): k = 2.0 → 5.7 alerts/week,
+  **k = 2.5 → 2.5/week** (4.7% of metric-weeks; 17 worse, 14 better, 6 volume), k = 3.0 → 0.7/week.
+  `docs/ALERT_CALIBRATION.md` was **not** updated: its fixed "Chosen" text says "under one alert a week",
+  which is no longer true, and the choice of k is an open decision for Divya.
+
+### Decisions
+- **TF-IDF over sentence embeddings**, against PLAN.md §11. Reason: higher tuning macro-F1 (0.71 vs 0.65), ~250×
+  faster, and no 220 MB model download in CI. Likely why: the training labels come from an LLM reading surface
+  words, and character n-grams catch Hinglish spelling variants ("bekar"/"bekaar") that the embedding models,
+  trained mostly on formal text, don't place close together.
+- **Retrain every run instead of saving a model file.** Training takes seconds, it avoids a binary in git and
+  pickle-version breakage, and the model always matches the label files in git. Old predictions are not
+  re-labelled unless `--rebuild` is passed, so after a label or setting change, run `--rebuild` once.
+- **Selected on 1–100 only.** The prototype printed held-out scores next to tuning scores, but the pick follows
+  the tuning column: the chosen setting scores 0.590 held-out; another TF-IDF setting scored 0.593 there and was not chosen.
+  Caveat: the chosen setting is at the edge of the grid (largest C, highest threshold).
+- **The classifier can't be better than its teacher on average**, and 0.59 vs 0.60 says it isn't worse. Its
+  ceiling is the LLM's labels, so better theme accuracy has to come from better training labels.
+
+### Failures and fixes
+- **Two embedding models silently merged:** the prototype keyed results by the model name cut to 22 characters,
+  both became `paraphrase-multilingua`, and mpnet overwrote MiniLM. Caught because only one block of results printed
+  for two models. Fixed with explicit keys and re-ran.
+- **Late-binding lambda:** the combined-features prediction function looked up the TF-IDF features from a dict
+  entry that had since been deleted (`KeyError: 'tfidf'`). Fixed by binding the function before deleting.
+- **Crash when there are no new reviews:** a second `qpulse.classify` run passed 0 rows to the vectorizer
+  (`ValueError: Found array with 0 sample(s)`). In CI this would fail the job on any day with nothing new.
+  Caught by running it twice locally; it now returns early. Tested all three paths: full (370,006), none (0),
+  incremental (500).
+
+### Next
+- Push and trigger one manual run of the daily workflow to confirm the classify step and `themes.parquet` upload.
+- Decide alert width with theme metrics (k = 2.5 at 2.5/week vs k = 3 at 0.7/week, or a different k for theme
+  shares), then regenerate `docs/ALERT_CALIBRATION.md` with the new reasoning.
+- M6 weekly report.
+

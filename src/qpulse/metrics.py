@@ -2,7 +2,9 @@
 
 uv run python -m qpulse.metrics                      # alerts for the latest full week
 uv run python -m qpulse.metrics --calibrate          # backtest alert widths -> docs/ALERT_CALIBRATION.md
-uv run python -m qpulse.metrics --themes FILE.csv    # add theme shares from a wide 0/1 label file
+uv run python -m qpulse.metrics --themes FILE        # theme shares from another wide 0/1 label file (.csv/.parquet)
+
+Theme shares come from data/themes.parquet (written by qpulse.classify) when it exists.
 
 All numbers come from the .sql files in sql/; this module only wires them together.
 """
@@ -13,6 +15,7 @@ from pathlib import Path
 import duckdb
 import pandas as pd
 
+from qpulse.classify import THEMES_OUT
 from qpulse.config import ALERT_K, ALERT_MIN_N, BASELINE_WEEKS, METRICS_START, ROOT
 from qpulse.db import connect
 from qpulse.quality import md_table
@@ -43,7 +46,8 @@ def setup(con: duckdb.DuckDBPyConnection, themes_csv: Path | None = None,
 
     parts = ["SELECT * FROM weekly_metrics"]
     if themes_csv is not None:
-        wide = pd.read_csv(themes_csv, dtype={"review_id": str})
+        wide = (pd.read_parquet(themes_csv) if themes_csv.suffix == ".parquet"
+                else pd.read_csv(themes_csv, dtype={"review_id": str}))
         long = wide.melt(id_vars="review_id", value_vars=THEME_KEYS, var_name="theme", value_name="on")
         con.register("themes_long", long[long["on"] == 1][["review_id", "theme"]])
         con.execute("CREATE OR REPLACE TEMP TABLE review_themes AS SELECT * FROM themes_long")
@@ -138,7 +142,8 @@ jump). k = 2.5 keeps those at under one alert a week. Re-check once theme metric
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--calibrate", action="store_true")
-    parser.add_argument("--themes", type=Path, help="wide CSV: review_id + one 0/1 column per theme")
+    parser.add_argument("--themes", type=Path, default=THEMES_OUT if THEMES_OUT.exists() else None,
+                        help="wide file: review_id + one 0/1 column per theme")
     args = parser.parse_args()
     if args.calibrate:
         calibrate(args.themes)
