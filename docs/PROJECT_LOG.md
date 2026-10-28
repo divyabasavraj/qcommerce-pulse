@@ -15,7 +15,7 @@ Automatic daily collection runs aren't listed here; they're in `run_log.csv` in 
 | 3 | Theme labelling | 1 day | 🟡 LLM labelled 3,300 reviews; hand labels 300/300 (27 corrected after review); LLM prompt v2: macro-F1 0.60, exact 70% on held-out hand labels 101–300 (v1: 0.59, 66%) |
 | 4 | Fast classifier | 0.5 day | ✅ Done 2026-10-28: TF-IDF + logistic regression, held-out macro-F1 0.59 (LLM 0.60), all 370k reviews in 10 s; running in the daily job |
 | 5 | SQL metrics + expected-range alerts | 1 day | ✅ Done 2026-10-28: rating, volume and theme-share metrics; alerts at k = 3 (0.7/week in backtest) |
-| 6 | Weekly report | 0.5 day | ⬜ |
+| 6 | Weekly report | 0.5 day | ✅ Done 2026-10-28: action list + follow-up + competitor + version watch; qwen2.5:3b summary fact-checked by code; written and committed by CI on Mondays |
 | 7 | Monthly memo + Diwali deep-dive | 1 day | ⬜ Diwali analysis needs data from after Nov 8 |
 | 8 | Dashboard | 0.5 day | ⬜ |
 | 9 | Ship | 0.5 day | ⬜ |
@@ -335,7 +335,7 @@ the LLM labels at shifts -2…+2 was 8–13%, flat), so no offset explains it an
 
 ---
 
-## 2026-10-28: Milestone 4, fast theme classifier
+## 2026-10-28: Milestone 4 (fast classifier), alert width k = 3, Milestone 6 (weekly report)
 
 ### Work done
 - **Pushed** the 8 commits from 2026-10-21 to 2026-10-24 to GitHub (`ee7d34b..215d1c7`).
@@ -411,7 +411,60 @@ the LLM labels at shifts -2…+2 was 8–13%, flat), so no offset explains it an
   existed in the release yet, so it labelled all 385,009 stored reviews in 18 s and uploaded `themes.parquet`
   (14 MB) to the `data` release. From now on each run labels only new reviews.
 
+### Work done: Milestone 6, weekly report
+- **Global rule** (`~/.claude/CLAUDE.md`, all projects): commit and push each day's work before a session ends.
+- **Writer choice (Divya):** `qwen2.5:3b` through Ollama inside the GitHub Actions job, so reports appear on
+  Mondays with no laptop and no API key. `qwen2.5:7b` is no longer installed locally; 3b pulled.
+- **`src/qpulse/weekly.py`** → `reports/weekly/<monday>.md` + `.json`. Sections: summary, actions (owner /
+  reason / expected effect), last week's follow-up, top 3 changes, alerts, competitor view (every metric × app,
+  change vs own normal), version watch, how to read it. Actions come from rules: each alert in the bad
+  direction or flagged version → owner by theme (Ops / Support / Product); rating-level alerts go to the owner
+  of the complaint rising most for that app. Top 3 by |z|. The expected effect is "back inside the expected
+  range within 2 weeks", which next week's follow-up tests (better / worse / no clear change at 2 sampling
+  errors, and whether it's back in range). The `.json` keeps the actions for that follow-up.
+- **`sql/version_watch.sql`**: versions with ≥ 100 reviews in the week whose bug or any-complaint share is
+  ≥ 2× the app's 8-week share and > 3 sampling errors above it (`VERSION_MIN_N` in config). None flagged in
+  the 4 weeks generated (13 versions had ≥ 100 reviews in the week of Oct 19).
+- **Latest week (Oct 19–25), 13,714 reviews:** one action: BigBasket availability / stock 3.2% vs 1.6%
+  normal (range 0.5–2.7%, z +4.7) → Ops. **Cross-checked** with pandas straight from the Parquet files,
+  outside the SQL: 41 / 1,269 = 3.2%, same. **Read the 41 reviews:** most are about BigBasket stopping
+  service in areas it used to serve ("closing service in my area", Nagpur, Chhatrapati Sambhajinagar, Gaya),
+  a few misclassified (RCB, debit-card voucher). A real signal.
+- **Backfilled reports** for the weeks of Sep 28, Oct 5 and Oct 12 so the follow-up chain starts with history
+  (none of those weeks had actions; Sep 28 had Blinkit's rating improving on both rating metrics).
+- **CI** (`.github/workflows/daily.yml`): after collection, on Mondays (IST) or when dispatched with
+  `weekly_report`, installs Ollama, pulls the model, runs `qpulse.weekly --skip-existing`, commits the report.
+  **Verified** with a dispatched [run](https://github.com/divyabasavraj/qcommerce-pulse/actions/runs/40642205817):
+  Ollama setup 1.5 min, report 28 s, committed `07562db` (week of Oct 19), fact check passed first time.
+- **Tests** `tests/test_weekly.py` (pytest, 5 tests) for the summary check.
+
+### Decisions (M6)
+- **The LLM sees facts, not the report.** Code writes one sentence per fact (value, normal, inside/outside,
+  better/worse), tied to an app. Reason: see the failure below.
+- **Check sentence by sentence, not number by number.** A number must come from a fact about an app named in
+  the same sentence; "outside" / "inside" / "within" must match those facts. One retry with the problems
+  listed, then a template. 4 weeks so far: 3 passed first time, 1 fell back to the template (Sep 28: the model
+  kept recommending "improving" a 1★ share that had improved).
+- **Actions by rule, not by the LLM.** The model only words what code decided. Owner mapping is a judgement
+  call: pricing_fees → Product, quality and missing items → Ops.
+- **Backfilled reports use today's data**, so they include reviews indexed after those weeks ended; the header
+  shows the generation date.
+
+### Failures and fixes (M6)
+- **The planned number check passed false summaries.** The first version checked that every number in the
+  summary appears somewhere in the report (PLAN.md §10). All 4 summaries passed, and 3 contained false
+  claims: "BigBasket missing items 2.6% … outside 0.3% to 2.7%" (inside), "1-star share increased by 2.4%,
+  outside 12.3%–25.6%" (2.4 was the z-score; 24.2% was inside), and recommended actions in a week with none.
+  Caught by reading the summaries against the tables, not by the check. Fixed with the facts input and the
+  sentence check; the new check rejects all 4 old summaries. **Interview point:** "numbers match" is
+  necessary but not sufficient; real numbers can be attached to the wrong thing.
+- **"1-star" read as the number 1** by the new check → false rejection. Star-rating names are stripped
+  before numbers are extracted; tested.
+- **Known gap:** the check can't judge interpretation words ("significant", "indicating stock-outs"), and a
+  sentence that names two apps can borrow a number from either.
+
 ### Next
-- M6 weekly report.
+- First real Monday run on Nov 2 (follows up the BigBasket availability action).
+- M7 monthly memo; the Diwali deep-dive needs data from after Nov 8.
 - In a week, Divya re-labels 30 random reviews blind to measure her own consistency.
 
