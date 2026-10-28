@@ -13,7 +13,7 @@ Automatic daily collection runs aren't listed here; they're in `run_log.csv` in 
 | 1 | Collector + 6-month backfill | 0.5 day | ✅ Done 2026-10-20 |
 | 2 | Data-quality report | 0.5 day | ✅ Done 2026-10-20 |
 | 3 | Theme labelling | 1 day | 🟡 LLM labelled 3,300 reviews; hand labels 300/300 (27 corrected after review); LLM prompt v2: macro-F1 0.60, exact 70% on held-out hand labels 101–300 (v1: 0.59, 66%) |
-| 4 | Fast classifier | 0.5 day | ✅ Done 2026-10-28: TF-IDF + logistic regression, held-out macro-F1 0.59 (LLM 0.60), all 370k reviews in 10 s; in the daily job (not yet run in CI) |
+| 4 | Fast classifier | 0.5 day | ✅ Done 2026-10-28: TF-IDF + logistic regression, held-out macro-F1 0.59 (LLM 0.60), all 370k reviews in 10 s; running in the daily job |
 | 5 | SQL metrics + expected-range alerts | 1 day | ✅ Done 2026-10-28: rating, volume and theme-share metrics; alerts at k = 3 (0.7/week in backtest) |
 | 6 | Weekly report | 0.5 day | ⬜ |
 | 7 | Monthly memo + Diwali deep-dive | 1 day | ⬜ Diwali analysis needs data from after Nov 8 |
@@ -406,7 +406,12 @@ the LLM labels at shifts -2…+2 was 8–13%, flat), so no offset explains it an
   (Sep 28) is still caught by both rating metrics. Not chosen: a separate k for theme shares (one more knob to
   justify).
 
+- **Verified in CI:** pushed (`4cb9f2e`) and ran the daily workflow by hand
+  ([run](https://github.com/divyabasavraj/qcommerce-pulse/actions/runs/40640794985), success). No themes file
+  existed in the release yet, so it labelled all 385,009 stored reviews in 18 s and uploaded `themes.parquet`
+  (14 MB) to the `data` release. From now on each run labels only new reviews.
+
 ### Next
-- Push and trigger one manual run of the daily workflow to confirm the classify step and `themes.parquet` upload.
 - M6 weekly report.
+- In a week, Divya re-labels 30 random reviews blind to measure her own consistency.
 
