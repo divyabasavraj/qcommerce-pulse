@@ -25,7 +25,7 @@ Automatic daily collection runs aren't listed here; they're in `run_log.csv` in 
 - [x] Number of hand labels → 300, all labelled by hand (2026-10-24)
 - [x] Alert sensitivity → k = 3 × SD of an 8-week baseline, min 200 reviews/week (2026-10-28, with theme metrics; was 2.5 from 2026-10-20)
 - [ ] Dashboard: Streamlit vs Looker Studio
-- [ ] Run the one-off data repair (`one-off-fix-timezone-2026-10` workflow): blocked for Claude by the permission system as a change to shared data; needs Divya, ideally before the Nov 1 memo
+- [x] Run the one-off data repair → run by Divya 2026-10-28 ([run](https://github.com/divyabasavraj/qcommerce-pulse/actions/runs/40645344036)), verified
 
 ---
 
@@ -531,8 +531,13 @@ the LLM labels at shifts -2…+2 was 8–13%, flat), so no offset explains it an
 - **Permission blocks:** pausing the daily workflow and dispatching the data repair were refused by the
   permission system. Code fixes were pushed; the data repair waits for Divya.
 
+- **Data repair run by Divya** ([run](https://github.com/divyabasavraj/qcommerce-pulse/actions/runs/40645344036)):
+  shifted 15,065 rows, dropped 61 old copies, 384,971 reviews. Verified on a fresh download: review IDs unique;
+  CI rows' hour-of-day profile now 0.20 pts/hour from the backfill (2.72 before). One-off workflow deleted
+  (the script stays in `scripts/` as the record). The release's `themes.parquet` predates version tracking,
+  so the next daily run re-labels all reviews once (~20 s).
+
 ### Next
-- **Divya:** run the data repair once: `gh workflow run fix-timezone-2026-10.yml`, ideally before Nov 1.
 - Nov 1: first scheduled memo (October). Nov 2: first scheduled weekly report (follows up BigBasket availability).
 - M8 dashboard (design bar: must look designed, not generic), M9 ship. Diwali deep-dive after Nov 8.
 - After Nov 5: labelling guide, "unsure" key, blind re-check, read "other".
