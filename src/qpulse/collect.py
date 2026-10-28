@@ -24,6 +24,13 @@ COLUMNS = [
 
 PHONE_RE = re.compile(r"(?<!\d)(?:\+?91[\s-]?)?[6-9]\d{4}[\s-]?\d{5}(?!\d)")
 EMAIL_RE = re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")
+# Review times are stored as naive IST. The scraper converts with datetime.fromtimestamp, i.e. the machine's
+# local time (IST on a laptop, UTC on GitHub Actions), so convert explicitly. collected_at stays naive UTC.
+IST = timezone(timedelta(hours=5, minutes=30))
+
+
+def to_ist(dt: datetime | None) -> datetime | None:
+    return None if dt is None else dt.astimezone(IST).replace(tzinfo=None)
 
 
 def mask_pii(text: str | None) -> str:
@@ -81,6 +88,8 @@ def fetch_since(app: str, package: str, lang: str, since: datetime, collected_at
                 raise IncompleteFetch(f"{lang}: stopped at {oldest:%Y-%m-%d} before reaching {since:%Y-%m-%d}")
             break
         token = next_token
+        for r in batch:
+            r["at"], r["repliedAt"] = to_ist(r["at"]), to_ist(r.get("repliedAt"))
         oldest = batch[-1]["at"]
         rows += [to_row(r, app, lang, collected_at) for r in batch if r["at"] >= since]
         if oldest < since or token is None or token.token is None:
@@ -124,13 +133,14 @@ def main() -> None:
     args = parser.parse_args()
 
     now = datetime.now(timezone.utc).replace(tzinfo=None)
+    now_ist = datetime.now(IST).replace(tzinfo=None)
     existing = load_existing()
     run_rows, new_frames, failed = [], [], []
 
     for app in args.apps:
         package = APPS[app]
         if args.backfill or existing.empty or app not in set(existing["app"]):
-            since = now - timedelta(days=BACKFILL_DAYS)
+            since = now_ist - timedelta(days=BACKFILL_DAYS)
         else:
             newest = pd.to_datetime(existing.loc[existing["app"] == app, "review_at"]).max()
             since = newest.to_pydatetime() - timedelta(days=OVERLAP_DAYS)
