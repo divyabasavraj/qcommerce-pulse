@@ -1,0 +1,36 @@
+{
+  "week": "2026-10-19",
+  "reviews": 13714,
+  "actions": [
+    {
+      "app": "bigbasket",
+      "metric": "theme:availability_stock",
+      "kind": "share",
+      "denom": 1267,
+      "value": 0.03235990528808208,
+      "se": null,
+      "base_mean": 0.015954791537155268,
+      "expected_low": 0.005394253628812887,
+      "expected_high": 0.02651532944549765,
+      "z": 4.66030629120723,
+      "owner": "Ops",
+      "todo": "review stock-outs and unserviceable areas",
+      "strength": 4.66030629120723
+    }
+  ],
+  "summary_source": "qwen2.5:3b, fact check passed first time",
+  "summary": "This week, BigBasket availability / stock was 3.2% outside the expected range of 0.5% to 2.7%, indicating significant issues with stock-outs and unserviceable areas. Review these areas immediately. No other apps showed significant deviations from their expected ranges.",
+  "facts": [
+    "13,714 reviews across the 4 apps this week.",
+    "Action 1, owner Ops: BigBasket availability / stock was 3.2% this week against a normal 1.6%; outside the expected range of 0.5% to 2.7% (worse than normal). Next step: review stock-outs and unserviceable areas.",
+    "BigBasket average rating was 3.82 against a normal 4.07; inside the expected range of 3.81 to 4.33 (normal variation, no action).",
+    "BigBasket 1\u2605 share was 24.2% against a normal 18.9%; inside the expected range of 12.3% to 25.6% (normal variation, no action)."
+  ],
+  "llm_attempts": [
+    {
+      "text": "This week, BigBasket availability / stock was 3.2% outside the expected range of 0.5% to 2.7%, indicating significant issues with stock-outs and unserviceable areas. Review these areas immediately. No other apps showed significant deviations from their expected ranges.",
+      "problems": []
+    }
+  ],
+  "followup": []
+}
