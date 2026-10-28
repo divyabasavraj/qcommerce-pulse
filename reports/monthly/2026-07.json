@@ -1,0 +1,183 @@
+{
+  "month": "2026-07",
+  "reviews": 65400,
+  "predictions": [
+    {
+      "app": "blinkit",
+      "metric": "avg_rating",
+      "low": 4.09,
+      "high": 4.14,
+      "months": 2
+    },
+    {
+      "app": "blinkit",
+      "metric": "theme:refund_support",
+      "low": 0.041,
+      "high": 0.047,
+      "months": 2
+    },
+    {
+      "app": "zepto",
+      "metric": "avg_rating",
+      "low": 3.28,
+      "high": 3.44,
+      "months": 2
+    },
+    {
+      "app": "zepto",
+      "metric": "theme:refund_support",
+      "low": 0.165,
+      "high": 0.206,
+      "months": 2
+    },
+    {
+      "app": "instamart",
+      "metric": "avg_rating",
+      "low": 4.02,
+      "high": 4.15,
+      "months": 2
+    },
+    {
+      "app": "instamart",
+      "metric": "theme:refund_support",
+      "low": 0.045,
+      "high": 0.06,
+      "months": 2
+    },
+    {
+      "app": "bigbasket",
+      "metric": "avg_rating",
+      "low": 4.16,
+      "high": 4.27,
+      "months": 2
+    },
+    {
+      "app": "bigbasket",
+      "metric": "theme:refund_support",
+      "low": 0.052,
+      "high": 0.072,
+      "months": 2
+    }
+  ],
+  "scorecard": null,
+  "top_fixes": [
+    {
+      "app": "zepto",
+      "theme": "refund_support",
+      "share": 0.1971199565276457,
+      "theme_avg_rating": 1.152997932460372,
+      "avg_rating": 3.3203369107458225,
+      "halved_avg_rating": 3.557305402757893,
+      "gain": 0.2369684920120707
+    },
+    {
+      "app": "zepto",
+      "theme": "quality_expiry",
+      "share": 0.10066567042521396,
+      "theme_avg_rating": 1.5870445344129556,
+      "avg_rating": 3.3203369107458225,
+      "halved_avg_rating": 3.4122022745154137,
+      "gain": 0.0918653637695912
+    },
+    {
+      "app": "bigbasket",
+      "theme": "refund_support",
+      "share": 0.05761112490687857,
+      "theme_avg_rating": 1.4137931034482758,
+      "avg_rating": 4.240253290290539,
+      "halved_avg_rating": 4.3240859115315775,
+      "gain": 0.0838326212410383
+    },
+    {
+      "app": "instamart",
+      "theme": "refund_support",
+      "share": 0.05457351290684624,
+      "theme_avg_rating": 1.2390745501285347,
+      "avg_rating": 4.11489898989899,
+      "halved_avg_rating": 4.195572221821591,
+      "gain": 0.08067323192260112
+    },
+    {
+      "app": "instamart",
+      "theme": "pricing_fees",
+      "share": 0.08529741863075196,
+      "theme_avg_rating": 2.674342105263158,
+      "avg_rating": 4.11489898989899,
+      "halved_avg_rating": 4.179073856975381,
+      "gain": 0.06417486707639153
+    },
+    {
+      "app": "bigbasket",
+      "theme": "delivery_delay",
+      "share": 0.054382915321579336,
+      "theme_avg_rating": 2.041095890410959,
+      "avg_rating": 4.240253290290539,
+      "halved_avg_rating": 4.301723037651564,
+      "gain": 0.061469747361024396
+    },
+    {
+      "app": "zepto",
+      "theme": "delivery_delay",
+      "share": 0.06466512702078522,
+      "theme_avg_rating": 1.5105042016806722,
+      "avg_rating": 3.3203369107458225,
+      "halved_avg_rating": 3.3808086480415556,
+      "gain": 0.060471737295733075
+    },
+    {
+      "app": "blinkit",
+      "theme": "refund_support",
+      "share": 0.04482348274494248,
+      "theme_avg_rating": 1.5658511192087454,
+      "avg_rating": 4.125347084490282,
+      "halved_avg_rating": 4.184024918549282,
+      "gain": 0.058677834058999956
+    },
+    {
+      "app": "blinkit",
+      "theme": "pricing_fees",
+      "share": 0.05833352777842593,
+      "theme_avg_rating": 2.6872,
+      "avg_rating": 4.125347084490282,
+      "halved_avg_rating": 4.1685533684235825,
+      "gain": 0.043206283933300504
+    },
+    {
+      "app": "blinkit",
+      "theme": "delivery_delay",
+      "share": 0.04034346781155937,
+      "theme_avg_rating": 2.4083285135916714,
+      "avg_rating": 4.125347084490282,
+      "halved_avg_rating": 4.160695362267072,
+      "gain": 0.03534827777678995
+    },
+    {
+      "app": "instamart",
+      "theme": "missing_wrong_item",
+      "share": 0.020622895622895623,
+      "theme_avg_rating": 1.4557823129251701,
+      "avg_rating": 4.11489898989899,
+      "halved_avg_rating": 4.142604011623786,
+      "gain": 0.027705021724796275
+    },
+    {
+      "app": "bigbasket",
+      "theme": "pricing_fees",
+      "share": 0.047554010429600196,
+      "theme_avg_rating": 3.227154046997389,
+      "avg_rating": 4.240253290290539,
+      "halved_avg_rating": 4.264928457869634,
+      "gain": 0.024675167579094825
+    }
+  ],
+  "summary_source": "written by code",
+  "summary": "The most valuable fix is refund / support at Zepto: 19.7% of its reviews, averaging 1.15 stars; halving them would raise its average review rating from 3.32 to 3.56 (an estimate). Refund / support is the #1 fix at all four apps (Zepto +0.24, BigBasket +0.08, Instamart +0.08, Blinkit +0.06).",
+  "facts": [
+    "65,400 reviews with text across the 4 apps in July 2026.",
+    "Blinkit's most valuable fix is refund / support: 4.5% of its reviews, averaging 1.57 stars; halving these complaints would raise Blinkit's average review rating from 4.13 to 4.18 (+0.06, an estimate).",
+    "Zepto's most valuable fix is refund / support: 19.7% of its reviews, averaging 1.15 stars; halving these complaints would raise Zepto's average review rating from 3.32 to 3.56 (+0.24, an estimate).",
+    "Instamart's most valuable fix is refund / support: 5.5% of its reviews, averaging 1.24 stars; halving these complaints would raise Instamart's average review rating from 4.11 to 4.20 (+0.08, an estimate).",
+    "BigBasket's most valuable fix is refund / support: 5.8% of its reviews, averaging 1.41 stars; halving these complaints would raise BigBasket's average review rating from 4.24 to 4.32 (+0.08, an estimate)."
+  ],
+  "llm_attempts": []
+}

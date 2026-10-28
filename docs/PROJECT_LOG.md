@@ -16,7 +16,7 @@ Automatic daily collection runs aren't listed here; they're in `run_log.csv` in 
 | 4 | Fast classifier | 0.5 day | ✅ Done 2026-10-28: TF-IDF + logistic regression, held-out macro-F1 0.59 (LLM 0.60), all 370k reviews in 10 s; running in the daily job |
 | 5 | SQL metrics + expected-range alerts | 1 day | ✅ Done 2026-10-28: rating, volume and theme-share metrics; alerts at k = 3 (0.7/week in backtest) |
 | 6 | Weekly report | 0.5 day | ✅ Done 2026-10-28: action list + follow-up + competitor + version watch; qwen2.5:3b summary fact-checked by code; written and committed by CI on Mondays |
-| 7 | Monthly memo + Diwali deep-dive | 1 day | ⬜ Diwali analysis needs data from after Nov 8 |
+| 7 | Monthly memo + Diwali deep-dive | 1 day | 🟡 Regular memo done 2026-10-28 (written by CI on the 1st; Jul–Sep backfilled); Diwali deep-dive needs data from after Nov 8 |
 | 8 | Dashboard | 0.5 day | ⬜ |
 | 9 | Ship | 0.5 day | ⬜ |
 
@@ -25,6 +25,7 @@ Automatic daily collection runs aren't listed here; they're in `run_log.csv` in 
 - [x] Number of hand labels → 300, all labelled by hand (2026-10-24)
 - [x] Alert sensitivity → k = 3 × SD of an 8-week baseline, min 200 reviews/week (2026-10-28, with theme metrics; was 2.5 from 2026-10-20)
 - [ ] Dashboard: Streamlit vs Looker Studio
+- [ ] Run the one-off data repair (`one-off-fix-timezone-2026-10` workflow): blocked for Claude by the permission system as a change to shared data; needs Divya, ideally before the Nov 1 memo
 
 ---
 
@@ -335,7 +336,7 @@ the LLM labels at shifts -2…+2 was 8–13%, flat), so no offset explains it an
 
 ---
 
-## 2026-10-28: Milestone 4 (fast classifier), alert width k = 3, Milestone 6 (weekly report)
+## 2026-10-28: Milestone 4 (fast classifier), alert width k = 3, Milestone 6 (weekly report), Milestone 7 (monthly memo), two data bugs
 
 ### Work done
 - **Pushed** the 8 commits from 2026-10-21 to 2026-10-24 to GitHub (`ee7d34b..215d1c7`).
@@ -463,8 +464,76 @@ the LLM labels at shifts -2…+2 was 8–13%, flat), so no offset explains it an
 - **Known gap:** the check can't judge interpretation words ("significant", "indicating stock-outs"), and a
   sentence that names two apps can borrow a number from either.
 
+### Labelling discussion (no changes made)
+- Divya found multi-problem reviews hard to label and asked about a "multiple problems" class or more themes.
+  Her labels agree: 45 of 149 complaint reviews have 2+ complaint themes; 23 of 36 refund_support reviews also
+  carry another complaint (top pair quality_expiry + refund_support, 14).
+- Advice: no "multiple problems" class (it hides which owner acts; multi-label already covers it) and no new
+  themes without evidence (fewer examples each; partner_behaviour already F1 0.29 on 9 test reviews). The gap is
+  boundary rules: e.g. tick the root problem, and refund_support only when the refund / support handling is the
+  complaint. Divya has exams until Nov 5, so this waits: labelling guide, an "unsure" key, the blind re-check
+  (~40 reviews, mostly 101–300), and a read of "other" (9.4% of reviews) for a missing theme.
+
+### Work done: data bugs found while building M7
+- **Review times were stored in two timezones.** `google-play-scraper` converts with
+  `datetime.fromtimestamp` (machine-local time): the laptop backfill stored IST, CI runs stored UTC.
+  Evidence: CI rows' hour-of-day profile differs from the backfill by 2.72 pts/hour as stored and 0.20 after
+  +5:30. 15,065 reviews affected (CI runs from 2026-10-20 10:06 UTC). Fixed in `collect.py` (`to_ist`,
+  commit `a03a2d7`, pushed 2026-10-28 06:28:27 UTC); tested on IST and UTC clocks.
+- **Edited reviews were kept twice.** An edit keeps the review ID but moves the date; `save()` deduplicated
+  only within a month file, so 61 reviews had an old copy in an earlier month (74% with changed text, e.g. 5★
+  → 1★). Fixed: `save()` drops the old copy from other months (test `tests/test_collect.py`).
+- **Edited reviews kept their old themes.** `classify` now stores the labelled version (`collected_at`) and
+  re-labels newer versions; tested (5 stale versions → 5 re-labelled).
+- **Repair** `scripts/fix_review_timezone_2026_10.py` (+5:30 on the 15,065 rows, drop the 61 old copies;
+  asserts no review ID is lost). Dry run on a downloaded copy: 384,971 unique reviews, IDs unchanged. A
+  one-off workflow `.github/workflows/fix-timezone-2026-10.yml` runs it in the daily job's concurrency group
+  with a marker file so it can't run twice. **Not yet run:** Claude's attempts to pause the daily workflow and
+  to dispatch the repair were blocked by the permission system (changes to shared data / CI). Local data used
+  for the memos below is the repaired copy. The weekly reports for Sep 28–Oct 19 were built before the repair;
+  the difference is a few reviews near midnight.
+
+### Work done: Milestone 7, monthly memo (regular part)
+- **`sql/monthly_metrics.sql`**: reviews with text in complete calendar months (IST), same exclusions as the
+  weekly metrics. Impact sizing re-weights reviews carrying a theme by 0.5 and recomputes the average rating.
+  Hand-checked one value with a separate query: Zepto refund_support, Sep: +0.2415 both ways.
+- **`src/qpulse/monthly.py`** → `reports/monthly/<YYYY-MM>.md` + `.json`: summary, top 3 fixes per app,
+  impact table, competitor comparison (share, rank among the 4 apps, change vs last month), predictions for next
+  month, scorecard of last month's, deep-dive slot, how to read.
+- **Predictions are no-change baselines** made by code: each app's average rating and its #1 fix theme's
+  share stay within the last 3 months' range ± 2 sampling errors. A miss means something changed.
+- **Backfilled memos for Jul, Aug, Sep 2026.** Findings: **refund / support is the #1 fix at all four apps in
+  all three months**; Zepto's is by far the biggest (Sep: 20.6% of its reviews, averaging 1.14★; halving them
+  ≈ +0.24★, 3.24 → 3.48). No-change predictions: 4 of 8 right in Aug, 5 of 8 in Sep (9 of 16). The misses
+  were mostly refund / support shares rising past the range in August: month-to-month drift is larger than
+  sampling noise, so judgement predictions have a low bar to beat.
+- **Shared fact check** moved to `src/qpulse/factcheck.py` (weekly and monthly use it); tests renamed to
+  `tests/test_factcheck.py`. 7 tests pass.
+- **CI**: the daily job writes the memo on the 1st (IST) and commits it with any weekly report (one commit
+  step); manual runs can ask for either. The memo needs no Ollama.
+
+### Decisions (M7)
+- **The memo summary is written by code, not the LLM** (change from PLAN.md §10, open to Divya's review).
+  Evidence: of 3 qwen2.5:3b memo summaries, 2 passed the fact check but were false: "Zepto's average rating
+  stayed above 3.25" (it was 3.24; the prediction failed) and "Last month's predictions closely matched" in the
+  first memo, which had no predictions to score. The memo's facts are richer than the weekly ones, which leaves
+  the model more room to be wrong, and rules only catch known patterns. `--llm` keeps the option. The weekly
+  summaries stay LLM-written: all 3 that passed were checked by reading and are true.
+- **Months are IST calendar months** and complete once a later review exists, so the Nov 1 run covers October.
+- **Deep-dive slot is empty before November**, per PLAN.md §9.2 (Diwali first). Fees vs delays (deep-dive #2)
+  could run now on existing data if a deep-dive is wanted in the October memo.
+
+### Failures and fixes (M7)
+- **Repair script's own check fired:** the first dry run stopped at "duplicate review IDs before repair",
+  which is how the edited-review bug was found.
+- **First draft of the repair script** had a placeholder commit hash and a dead line; fixed before running.
+- **My test run of `qpulse.weekly --no-llm --week 2026-10-12` overwrote the committed report**; restored from git.
+- **Permission blocks:** pausing the daily workflow and dispatching the data repair were refused by the
+  permission system. Code fixes were pushed; the data repair waits for Divya.
+
 ### Next
-- First real Monday run on Nov 2 (follows up the BigBasket availability action).
-- M7 monthly memo; the Diwali deep-dive needs data from after Nov 8.
-- In a week, Divya re-labels 30 random reviews blind to measure her own consistency.
+- **Divya:** run the data repair once: `gh workflow run fix-timezone-2026-10.yml`, ideally before Nov 1.
+- Nov 1: first scheduled memo (October). Nov 2: first scheduled weekly report (follows up BigBasket availability).
+- M8 dashboard (design bar: must look designed, not generic), M9 ship. Diwali deep-dive after Nov 8.
+- After Nov 5: labelling guide, "unsure" key, blind re-check, read "other".
 

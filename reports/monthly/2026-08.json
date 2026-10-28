@@ -1,0 +1,237 @@
+{
+  "month": "2026-08",
+  "reviews": 65049,
+  "predictions": [
+    {
+      "app": "blinkit",
+      "metric": "avg_rating",
+      "low": 4.07,
+      "high": 4.14,
+      "months": 3
+    },
+    {
+      "app": "blinkit",
+      "metric": "theme:refund_support",
+      "low": 0.041,
+      "high": 0.052,
+      "months": 3
+    },
+    {
+      "app": "zepto",
+      "metric": "avg_rating",
+      "low": 3.25,
+      "high": 3.44,
+      "months": 3
+    },
+    {
+      "app": "zepto",
+      "metric": "theme:refund_support",
+      "low": 0.165,
+      "high": 0.221,
+      "months": 3
+    },
+    {
+      "app": "instamart",
+      "metric": "avg_rating",
+      "low": 4.01,
+      "high": 4.15,
+      "months": 3
+    },
+    {
+      "app": "instamart",
+      "metric": "theme:refund_support",
+      "low": 0.045,
+      "high": 0.068,
+      "months": 3
+    },
+    {
+      "app": "bigbasket",
+      "metric": "avg_rating",
+      "low": 4.14,
+      "high": 4.27,
+      "months": 3
+    },
+    {
+      "app": "bigbasket",
+      "metric": "theme:refund_support",
+      "low": 0.052,
+      "high": 0.073,
+      "months": 3
+    }
+  ],
+  "scorecard": [
+    {
+      "app": "Blinkit",
+      "prediction": "average rating stays within 4.09\u20134.14",
+      "actual": "4.08",
+      "result": "wrong"
+    },
+    {
+      "app": "Blinkit",
+      "prediction": "refund / support share stays within 4.1%\u20134.7%",
+      "actual": "5.0%",
+      "result": "wrong"
+    },
+    {
+      "app": "Zepto",
+      "prediction": "average rating stays within 3.28\u20133.44",
+      "actual": "3.29",
+      "result": "right"
+    },
+    {
+      "app": "Zepto",
+      "prediction": "refund / support share stays within 16.5%\u201320.6%",
+      "actual": "21.1%",
+      "result": "wrong"
+    },
+    {
+      "app": "Instamart",
+      "prediction": "average rating stays within 4.02\u20134.15",
+      "actual": "4.04",
+      "result": "right"
+    },
+    {
+      "app": "Instamart",
+      "prediction": "refund / support share stays within 4.5%\u20136.0%",
+      "actual": "6.3%",
+      "result": "wrong"
+    },
+    {
+      "app": "BigBasket",
+      "prediction": "average rating stays within 4.16\u20134.27",
+      "actual": "4.17",
+      "result": "right"
+    },
+    {
+      "app": "BigBasket",
+      "prediction": "refund / support share stays within 5.2%\u20137.2%",
+      "actual": "6.7%",
+      "result": "right"
+    }
+  ],
+  "top_fixes": [
+    {
+      "app": "zepto",
+      "theme": "refund_support",
+      "share": 0.21139631769923398,
+      "theme_avg_rating": 1.1131595677050223,
+      "avg_rating": 3.2933745464319313,
+      "halved_avg_rating": 3.551055676609813,
+      "gain": 0.25768113017788163
+    },
+    {
+      "app": "bigbasket",
+      "theme": "refund_support",
+      "share": 0.06660595811109665,
+      "theme_avg_rating": 1.275390625,
+      "avg_rating": 4.172499024326785,
+      "halved_avg_rating": 4.272305207912797,
+      "gain": 0.09980618358601223
+    },
+    {
+      "app": "zepto",
+      "theme": "quality_expiry",
+      "share": 0.10657169735250638,
+      "theme_avg_rating": 1.5914249684741488,
+      "avg_rating": 3.2933745464319313,
+      "halved_avg_rating": 3.3891688551352117,
+      "gain": 0.09579430870328043
+    },
+    {
+      "app": "instamart",
+      "theme": "refund_support",
+      "share": 0.06253594019551466,
+      "theme_avg_rating": 1.2666666666666666,
+      "avg_rating": 4.041978148361127,
+      "halved_avg_rating": 4.131557468279291,
+      "gain": 0.08957931991816359
+    },
+    {
+      "app": "zepto",
+      "theme": "missing_wrong_item",
+      "share": 0.061819647896788066,
+      "theme_avg_rating": 1.2,
+      "avg_rating": 3.2933745464319313,
+      "halved_avg_rating": 3.3601442241020663,
+      "gain": 0.06676967767013497
+    },
+    {
+      "app": "blinkit",
+      "theme": "refund_support",
+      "share": 0.049877807517747,
+      "theme_avg_rating": 1.5030331311245917,
+      "avg_rating": 4.081973699522868,
+      "halved_avg_rating": 4.147934643799157,
+      "gain": 0.06596094427628962
+    },
+    {
+      "app": "bigbasket",
+      "theme": "delivery_delay",
+      "share": 0.057109405489787955,
+      "theme_avg_rating": 1.9498861047835991,
+      "avg_rating": 4.172499024326785,
+      "halved_avg_rating": 4.237830599263475,
+      "gain": 0.06533157493668984
+    },
+    {
+      "app": "instamart",
+      "theme": "pricing_fees",
+      "share": 0.08064979873490512,
+      "theme_avg_rating": 2.716577540106952,
+      "avg_rating": 4.041978148361127,
+      "halved_avg_rating": 4.0976705864729235,
+      "gain": 0.05569243811179625
+    },
+    {
+      "app": "blinkit",
+      "theme": "pricing_fees",
+      "share": 0.06384266263237519,
+      "theme_avg_rating": 2.6259569814072186,
+      "avg_rating": 4.081973699522868,
+      "halved_avg_rating": 4.129984252347121,
+      "gain": 0.048010552824253594
+    },
+    {
+      "app": "blinkit",
+      "theme": "delivery_delay",
+      "share": 0.041871290585360176,
+      "theme_avg_rating": 2.324068927181768,
+      "avg_rating": 4.081973699522868,
+      "halved_avg_rating": 4.119563537816025,
+      "gain": 0.03758983829315721
+    },
+    {
+      "app": "instamart",
+      "theme": "missing_wrong_item",
+      "share": 0.023576768257619323,
+      "theme_avg_rating": 1.4268292682926829,
+      "avg_rating": 4.041978148361127,
+      "halved_avg_rating": 4.073174279895258,
+      "gain": 0.0311961315341307
+    },
+    {
+      "app": "bigbasket",
+      "theme": "pricing_fees",
+      "share": 0.05203590477429426,
+      "theme_avg_rating": 3.175,
+      "avg_rating": 4.172499024326785,
+      "halved_avg_rating": 4.199145184987311,
+      "gain": 0.026646160660526164
+    }
+  ],
+  "summary_source": "written by code",
+  "summary": "The most valuable fix is refund / support at Zepto: 21.1% of its reviews, averaging 1.11 stars; halving them would raise its average review rating from 3.29 to 3.55 (an estimate). Refund / support is the #1 fix at all four apps (Zepto +0.26, BigBasket +0.10, Instamart +0.09, Blinkit +0.07). 4 of 8 of last month's predictions were right; missed: Blinkit average rating (predicted 4.09\u20134.14, actual 4.08); Blinkit refund / support share (predicted 4.1%\u20134.7%, actual 5.0%); Zepto refund / support share (predicted 16.5%\u201320.6%, actual 21.1%); Instamart refund / support share (predicted 4.5%\u20136.0%, actual 6.3%).",
+  "facts": [
+    "65,049 reviews with text across the 4 apps in August 2026.",
+    "Blinkit's most valuable fix is refund / support: 5.0% of its reviews, averaging 1.50 stars; halving these complaints would raise Blinkit's average review rating from 4.08 to 4.15 (+0.07, an estimate).",
+    "Zepto's most valuable fix is refund / support: 21.1% of its reviews, averaging 1.11 stars; halving these complaints would raise Zepto's average review rating from 3.29 to 3.55 (+0.26, an estimate).",
+    "Instamart's most valuable fix is refund / support: 6.3% of its reviews, averaging 1.27 stars; halving these complaints would raise Instamart's average review rating from 4.04 to 4.13 (+0.09, an estimate).",
+    "BigBasket's most valuable fix is refund / support: 6.7% of its reviews, averaging 1.28 stars; halving these complaints would raise BigBasket's average review rating from 4.17 to 4.27 (+0.10, an estimate).",
+    "4 of 8 of last month's predictions were right.",
+    "Wrong prediction: Blinkit average rating stays within 4.09\u20134.14; actual 4.08.",
+    "Wrong prediction: Blinkit refund / support share stays within 4.1%\u20134.7%; actual 5.0%.",
+    "Wrong prediction: Zepto refund / support share stays within 16.5%\u201320.6%; actual 21.1%.",
+    "Wrong prediction: Instamart refund / support share stays within 4.5%\u20136.0%; actual 6.3%."
+  ],
+  "llm_attempts": []
+}

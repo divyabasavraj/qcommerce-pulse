@@ -9,6 +9,10 @@ on:
         description: "Also write the weekly report (normally Mondays only)"
         type: boolean
         default: false
+      monthly_memo:
+        description: "Also write the monthly memo (normally the 1st only)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -51,27 +55,37 @@ jobs:
           gh release upload data data/run_log.csv --clobber
           if [ -f data/themes.parquet ]; then gh release upload data data/themes.parquet --clobber; fi
 
-      # Weekly report: Mondays (IST), after collection so last week's Sunday is complete.
-      - name: Is it Monday?
-        id: day
-        run: echo "monday=$([ "$(TZ=Asia/Kolkata date +%u)" = 1 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+      # Reports run after collection, so the week / month that just ended is complete.
+      # Weekly report on Mondays (IST), monthly memo on the 1st (IST), or when asked for in a manual run.
+      - name: Which reports are due?
+        id: due
+        run: |
+          echo "weekly=$([ "$(TZ=Asia/Kolkata date +%u)" = 1 ] || [ "${{ inputs.weekly_report }}" = true ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "monthly=$([ "$(TZ=Asia/Kolkata date +%d)" = 01 ] || [ "${{ inputs.monthly_memo }}" = true ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
       - name: Start Ollama with the report model
-        if: steps.day.outputs.monday == 'true' || inputs.weekly_report
+        if: steps.due.outputs.weekly == 'true'
         run: |
           curl -fsSL https://ollama.com/install.sh | sh
           (ollama serve > /tmp/ollama.log 2>&1 &) || true
           until curl -sf http://localhost:11434/api/version > /dev/null; do sleep 1; done
           ollama pull "$(uv run python -c 'from qpulse.config import REPORT_MODEL; print(REPORT_MODEL)')"
 
-      - name: Write and commit the weekly report
-        if: steps.day.outputs.monday == 'true' || inputs.weekly_report
+      - name: Write the weekly report
+        if: steps.due.outputs.weekly == 'true'
+        run: uv run python -m qpulse.weekly --skip-existing
+
+      - name: Write the monthly memo
+        if: steps.due.outputs.monthly == 'true'
+        run: uv run python -m qpulse.monthly --skip-existing
+
+      - name: Commit new reports
+        if: steps.due.outputs.weekly == 'true' || steps.due.outputs.monthly == 'true'
         run: |
-          uv run python -m qpulse.weekly --skip-existing
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add reports/weekly
-          if git diff --cached --quiet; then echo "no new report"; exit 0; fi
-          git commit -m "Weekly report: week of $(ls reports/weekly/*.md | sort | tail -1 | xargs basename -s .md)"
+          git add reports
+          if git diff --cached --quiet; then echo "no new reports"; exit 0; fi
+          git commit -m "Reports: $(git diff --cached --name-only -- 'reports/*.md' | xargs -n1 basename | tr '\n' ' ')"
           git pull --rebase origin main
           git push origin HEAD:main
