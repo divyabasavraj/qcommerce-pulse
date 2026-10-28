@@ -89,15 +89,22 @@ def train(c: float = C, threshold: float = THRESHOLD) -> ThemeClassifier:
 def label_reviews(rebuild: bool = False) -> None:
     t0 = time.time()
     con = connect()
-    reviews = con.sql("SELECT review_id, text FROM reviews").df()
+    reviews = con.sql("SELECT review_id, text, collected_at FROM reviews").df()
     old = pd.read_parquet(THEMES_OUT) if THEMES_OUT.exists() and not rebuild else None
-    todo = reviews if old is None else reviews[~reviews["review_id"].isin(old["review_id"])]
+    if old is not None and "collected_at" not in old:
+        old = None  # file from before versions were tracked: re-label everything once
+    if old is None:
+        todo = reviews
+    else:
+        # New reviews, and edited ones: a newer collected copy than the one that was labelled.
+        seen = reviews.merge(old[["review_id", "collected_at"]], on="review_id", how="left", suffixes=("", "_old"))
+        todo = reviews[(seen["collected_at_old"].isna() | (seen["collected_at"] > seen["collected_at_old"])).values]
     if todo.empty:
         print(f"no new reviews to label ({len(old):,} already in {THEMES_OUT.relative_to(ROOT)})")
         return
     clf = train()
-    new = pd.concat([todo[["review_id"]].reset_index(drop=True), clf.predict(texts(todo))], axis=1)
-    out = new if old is None else pd.concat([old, new], ignore_index=True)
+    new = pd.concat([todo[["review_id", "collected_at"]].reset_index(drop=True), clf.predict(texts(todo))], axis=1)
+    out = new if old is None else pd.concat([old[~old["review_id"].isin(todo["review_id"])], new], ignore_index=True)
     out.to_parquet(THEMES_OUT, index=False)
     print(f"labelled {len(new):,} reviews ({len(out):,} total) in {time.time() - t0:.0f}s -> {THEMES_OUT.relative_to(ROOT)}")
 

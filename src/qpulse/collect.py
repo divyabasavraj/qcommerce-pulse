@@ -109,6 +109,14 @@ def save(df: pd.DataFrame) -> None:
     """Rewrite the monthly Parquet files touched by `df`, merging with what's already stored."""
     RAW_DIR.mkdir(parents=True, exist_ok=True)
     df = df.assign(month=pd.to_datetime(df["review_at"]).dt.strftime("%Y-%m"))
+    # An edited review keeps its ID but gets a new date, possibly in another month: drop the old copy there.
+    ids = set(df["review_id"])
+    for path in sorted(RAW_DIR.glob("reviews_*.parquet")):
+        if path.stem.removeprefix("reviews_") in set(df["month"]):
+            continue
+        old = pd.read_parquet(path)
+        if old["review_id"].isin(ids).any():
+            old[~old["review_id"].isin(ids)].to_parquet(path, index=False)
     for month, part in df.groupby("month"):
         path = RAW_DIR / f"reviews_{month}.parquet"
         part = part.drop(columns="month")
