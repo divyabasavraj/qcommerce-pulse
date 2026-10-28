@@ -569,8 +569,10 @@ the LLM labels at shifts -2…+2 was 8–13%, flat), so no offset explains it an
   correct is 27 + 8. I had also told Divya "10 adjudicated" earlier in the session; it's 8 (#55 and #90 are among
   them). The log already said 8.
 - **Mixed number styles** (Indian "3,84,971" vs "384,971" in reports): unified on international grouping.
-- **Permission system blocked** installing nothing; npm 11 held back esbuild's install script, which turned out
-  not to be needed (build works without it).
+- **npm 11 held back esbuild's install script** (unapproved install scripts); left unapproved, since the build
+  works without it.
+- **Switching on GitHub Pages was blocked** for Claude by the permission system (creates a public site); left
+  to Divya.
 
 ### Next
 - **Divya:** switch GitHub Pages on (Settings → Pages → Source: GitHub Actions) if Claude can't.
