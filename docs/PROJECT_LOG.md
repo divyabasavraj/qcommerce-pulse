@@ -17,7 +17,7 @@ Automatic daily collection runs aren't listed here; they're in `run_log.csv` in 
 | 5 | SQL metrics + expected-range alerts | 1 day | ✅ Done 2026-10-28: rating, volume and theme-share metrics; alerts at k = 3 (0.7/week in backtest) |
 | 6 | Weekly report | 0.5 day | ✅ Done 2026-10-28: action list + follow-up + competitor + version watch; qwen2.5:3b summary fact-checked by code; written and committed by CI on Mondays |
 | 7 | Monthly memo + Diwali deep-dive | 1 day | 🟡 Regular memo done 2026-10-28 (written by CI on the 1st; Jul–Sep backfilled); Diwali deep-dive needs data from after Nov 8 |
-| 8 | Dashboard | 0.5 day | 🟡 Built 2026-10-28 (Observable Framework, 5 pages, rebuilt by the daily job); waiting for GitHub Pages to be switched on |
+| 8 | Dashboard | 0.5 day | ✅ Live 2026-10-28: https://divyabasavraj.github.io/qcommerce-pulse/ (Observable Framework, 5 pages, rebuilt by the daily job) |
 | 9 | Ship | 0.5 day | ⬜ |
 
 **Open decisions (from PLAN.md §17):**
@@ -573,9 +573,12 @@ the LLM labels at shifts -2…+2 was 8–13%, flat), so no offset explains it an
   works without it.
 - **Switching on GitHub Pages was blocked** for Claude by the permission system (creates a public site); left
   to Divya.
+- **Live:** Divya switched Pages on and ran the daily workflow
+  ([run](https://github.com/divyabasavraj/qcommerce-pulse/actions/runs/40649006041): collect and deploy both
+  succeeded). Checked the live site: all 5 pages return 200 with no console errors; home page matches the local
+  build.
 
 ### Next
-- **Divya:** switch GitHub Pages on (Settings → Pages → Source: GitHub Actions) if Claude can't.
 - Nov 1: first scheduled memo (October). Nov 2: first scheduled weekly report (follows up BigBasket availability).
 - M8 dashboard (design bar: must look designed, not generic), M9 ship. Diwali deep-dive after Nov 8.
 - After Nov 5: labelling guide, "unsure" key, blind re-check, read "other".
