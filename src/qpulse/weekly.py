@@ -11,23 +11,21 @@ uv run python -m qpulse.weekly --skip-existing      # CI: do nothing if this wee
 """
 import argparse
 import json
-import re
 from datetime import date, timedelta
 
 import numpy as np
 import pandas as pd
-import requests
 
 from qpulse.classify import THEMES_OUT
-from qpulse.config import (ALERT_K, ALERT_MIN_N, BASELINE_WEEKS, REPORT_MODEL, ROOT, VERSION_MIN_N)
+from qpulse.config import (ALERT_K, ALERT_MIN_N, APP_NAMES, BASELINE_WEEKS, REPORT_MODEL, ROOT, VERSION_MIN_N)
 from qpulse.db import connect
-from qpulse.llm_label import OLLAMA_URL
+from qpulse.factcheck import llm_summary
 from qpulse.metrics import SQL, alerts_frame, setup
 from qpulse.quality import md_table
 from qpulse.themes import THEME_KEYS
 
 REPORTS = ROOT / "reports" / "weekly"
-APPS = {"blinkit": "Blinkit", "zepto": "Zepto", "instamart": "Instamart", "bigbasket": "BigBasket"}
+APPS = APP_NAMES
 LABEL = {
     "reviews": "review count", "avg_rating": "average rating", "pct_1star": "1★ share",
     **{f"theme:{k}": k.replace("_", " ") for k in THEME_KEYS},
@@ -259,16 +257,6 @@ This week's value and change from each app's own {BASELINE_WEEKS}-week normal. B
 """
 
 
-NUM = re.compile(r"\d[\d,]*(?:\.\d+)?")
-
-
-STARS = re.compile(r"\b[1-5](?:★|[- ]stars?\b)", re.I)  # "1★", "1-star": a name, not a number
-
-
-def numbers(text: str) -> set[str]:
-    return {n.replace(",", "").rstrip(".") for n in NUM.findall(STARS.sub("", text))}
-
-
 def facts(cur: pd.DataFrame, acts: list[dict], follow: pd.DataFrame | None, total: int) -> list[dict]:
     """The only material the LLM sees: sentences written by code, each tied to one app (or none) and a status."""
     out = [{"app": None, "status": None, "text": f"{total:,} reviews across the 4 apps this week."}]
@@ -312,28 +300,6 @@ def facts(cur: pd.DataFrame, acts: list[dict], follow: pd.DataFrame | None, tota
     return out
 
 
-SENTENCE = re.compile(r"(?<=[.!?])\s+(?=[A-Z])")
-
-
-def check_summary(summary: str, fact_list: list[dict]) -> list[str]:
-    """Problems with the summary, sentence by sentence. Each number must come from a fact about an app named in
-    the same sentence (or a fact about no app), and 'outside' / 'inside' the range must match those facts."""
-    problems = []
-    for sent in SENTENCE.split(summary.strip()):
-        named = {k for k, v in APPS.items() if v.lower() in sent.lower()}
-        usable = [f for f in fact_list if f["app"] is None or f["app"] in named]
-        for n in sorted(numbers(sent)):
-            if not any(n in numbers(f["text"]) for f in fact_list):
-                problems.append(f'"{n}" is not in the facts')
-            elif not any(n in numbers(f["text"]) for f in usable):
-                problems.append(f'"{n}" belongs to a different app than the one named in: "{sent}"')
-        for word, status in (("outside", "outside"), ("inside", "inside"), ("within", "inside")):
-            if named and re.search(rf"\b{word}\b", sent, re.I) and not any(
-                    f["status"] == status for f in usable if f["app"] is not None):
-                problems.append(f'"{word}" the expected range is not true for the app named in: "{sent}"')
-    return problems
-
-
 PROMPT = """You write the summary at the top of a weekly customer-feedback report for the Head of Customer
 Experience at an Indian quick-commerce company. The facts below were computed by code from Play Store reviews.
 
@@ -349,27 +315,6 @@ Rules:
 
 FACTS:
 """
-
-
-def llm_summary(fact_list: list[dict], model: str) -> tuple[str | None, list[dict]]:
-    """Ask the model for a summary; one retry naming the problems. Returns (summary or None, attempts)."""
-    messages = [{"role": "user", "content": PROMPT + "\n".join(f"- {f['text']}" for f in fact_list)}]
-    attempts = []
-    for _ in range(2):
-        resp = requests.post(OLLAMA_URL, json={
-            "model": model, "stream": False, "messages": messages,
-            "options": {"temperature": 0, "num_ctx": 8192},
-        }, timeout=600)
-        resp.raise_for_status()
-        text = resp.json()["message"]["content"].strip()
-        problems = check_summary(text, fact_list)
-        attempts.append({"text": text, "problems": problems})
-        if not problems:
-            return text, attempts
-        messages += [{"role": "assistant", "content": text},
-                     {"role": "user", "content": "This summary has errors:\n" + "\n".join(f"- {p}" for p in problems)
-                                                 + "\nRewrite it using only the facts, following the rules."}]
-    return None, attempts
 
 
 def template_summary(acts: list[dict], cur: pd.DataFrame) -> str:
@@ -417,7 +362,7 @@ def main() -> None:
     if args.no_llm:
         summary, attempts, source = None, [], "template (LLM not used)"
     else:
-        summary, attempts = llm_summary(fact_list, args.model)
+        summary, attempts = llm_summary(PROMPT, fact_list, args.model)
         source = (f"{args.model}, fact check passed first time" if summary and len(attempts) == 1 else
                   f"{args.model}, fact check passed on retry" if summary else
                   f"template: {args.model} failed the fact check twice")

@@ -1,4 +1,4 @@
-from qpulse.weekly import check_summary
+from qpulse.factcheck import check_summary
 
 FACTS = [
     {"app": None, "status": None, "text": "13,714 reviews across the 4 apps this week."},

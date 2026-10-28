@@ -15,6 +15,8 @@ APPS = {
     "instamart": "in.swiggy.android.instamart",
 }
 
+APP_NAMES = {"blinkit": "Blinkit", "zepto": "Zepto", "instamart": "Instamart", "bigbasket": "BigBasket"}
+
 # Play Store review language filters. Hinglish is mostly Latin script and arrives under "en".
 LANGS = ["en", "hi"]
 COUNTRY = "in"
