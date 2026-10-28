@@ -4,9 +4,11 @@ import duckdb
 from qpulse.config import DB_PATH, RAW_DIR
 
 
-def connect(read_only: bool = False) -> duckdb.DuckDBPyConnection:
-    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    con = duckdb.connect(str(DB_PATH), read_only=read_only)
+def connect(read_only: bool = False, path: str | None = None) -> duckdb.DuckDBPyConnection:
+    """path=":memory:" for processes that may run in parallel (dashboard data loaders): no file lock."""
+    if path is None:
+        DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    con = duckdb.connect(path or str(DB_PATH), read_only=read_only)
     if not read_only:
         con.execute(f"""
             CREATE OR REPLACE VIEW reviews AS

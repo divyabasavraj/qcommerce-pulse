@@ -17,14 +17,14 @@ Automatic daily collection runs aren't listed here; they're in `run_log.csv` in 
 | 5 | SQL metrics + expected-range alerts | 1 day | ✅ Done 2026-10-28: rating, volume and theme-share metrics; alerts at k = 3 (0.7/week in backtest) |
 | 6 | Weekly report | 0.5 day | ✅ Done 2026-10-28: action list + follow-up + competitor + version watch; qwen2.5:3b summary fact-checked by code; written and committed by CI on Mondays |
 | 7 | Monthly memo + Diwali deep-dive | 1 day | 🟡 Regular memo done 2026-10-28 (written by CI on the 1st; Jul–Sep backfilled); Diwali deep-dive needs data from after Nov 8 |
-| 8 | Dashboard | 0.5 day | ⬜ |
+| 8 | Dashboard | 0.5 day | 🟡 Built 2026-10-28 (Observable Framework, 5 pages, rebuilt by the daily job); waiting for GitHub Pages to be switched on |
 | 9 | Ship | 0.5 day | ⬜ |
 
 **Open decisions (from PLAN.md §17):**
 - [x] Swiggy Instamart app ID → standalone app `in.swiggy.android.instamart` (2026-10-20)
 - [x] Number of hand labels → 300, all labelled by hand (2026-10-24)
 - [x] Alert sensitivity → k = 3 × SD of an 8-week baseline, min 200 reviews/week (2026-10-28, with theme metrics; was 2.5 from 2026-10-20)
-- [ ] Dashboard: Streamlit vs Looker Studio
+- [x] Dashboard → Observable Framework on GitHub Pages (2026-10-28; Divya asked for something better-looking than Streamlit / Looker Studio)
 - [x] Run the one-off data repair → run by Divya 2026-10-28 ([run](https://github.com/divyabasavraj/qcommerce-pulse/actions/runs/40645344036)), verified
 
 ---
@@ -336,7 +336,7 @@ the LLM labels at shifts -2…+2 was 8–13%, flat), so no offset explains it an
 
 ---
 
-## 2026-10-28: Milestone 4 (fast classifier), alert width k = 3, Milestone 6 (weekly report), Milestone 7 (monthly memo), two data bugs
+## 2026-10-28: Milestone 4 (fast classifier), alert width k = 3, Milestone 6 (weekly report), Milestone 7 (monthly memo), two data bugs, Milestone 8 (dashboard)
 
 ### Work done
 - **Pushed** the 8 commits from 2026-10-21 to 2026-10-24 to GitHub (`ee7d34b..215d1c7`).
@@ -537,7 +537,43 @@ the LLM labels at shifts -2…+2 was 8–13%, flat), so no offset explains it an
   (the script stays in `scripts/` as the record). The release's `themes.parquet` predates version tracking,
   so the next daily run re-labels all reviews once (~20 s).
 
+### Work done: Milestone 8, dashboard
+- **Tool: Observable Framework 1.13.4** (`dashboard/`), static site on GitHub Pages. Chosen over Streamlit
+  (recognisable default look, free apps sleep and take 30 s+ to wake) and Looker Studio (generic, needs data
+  copied to Sheets/BigQuery). Data loaders are Python (`dashboard/src/data/*.json.py` → `src/qpulse/dashboard_data.py`)
+  run through uv, so every number comes from the same SQL as the reports.
+- **Pages:** This week (headline sentence built by code from the latest weekly report, 5 random reviews behind
+  the top action, its expected-range chart, actions, a 12-metric × 4-app board of weekly distance from normal,
+  follow-up, the fact-checked AI summary with its provenance); Trends (any metric, 4 small multiples on a
+  shared scale); Compare apps (monthly complaint dot plot, weekly rating lines); What to fix (memo impact bars,
+  predictions, scorecard); How it works (pipeline, held-out accuracy, per-theme F1 classifier vs LLM, hand
+  labels, the fact check and its failures, limitations). Every chart has a table view or labels.
+- **Design:** one type family, Anek (Ek Type, an Indian foundry; Latin plus Devanagari for Hindi review text),
+  condensed for headlines. Ink-blue text on white, no cards. App colours echo the brands where colour-blind
+  checks allow: Blinkit yellow, Zepto violet, BigBasket green; Instamart magenta. Picked by running the dataviz
+  validator on every 4-colour set from the reference palette: only 2 of 70 pass all pairs in light and dark;
+  the brand-echo first try (amber + orange) failed with deutan ΔE 1.6. Light-mode contrast warnings are met
+  with visible labels and table views. Dark mode has its own validated steps.
+- **Checked:** screenshots of every page at 1280 px, the home page at 390 px (the board becomes one app with
+  a picker) and in dark mode; no console errors on any page.
+- **CI:** the daily job builds the site after collection and reports, and a `deploy-dashboard` job publishes
+  it with `actions/deploy-pages`.
+
+### Failures and fixes (M8)
+- **Inline `${…}` blocks spanning blank lines** rendered as raw code in Markdown; moved into JS blocks.
+- **A JS block with a declaration doesn't auto-display** (Framework only displays pure expression blocks): the
+  quotes section silently vanished. Found by screenshot, not by an error.
+- **`.note` is a built-in Framework class** (grey callout box); my captions used it. Renamed to `.caption`.
+- **Board values overlapped the next app's sparkline**; each cell now leaves room for its number.
+- **Hand-label counts:** the method page first said 35 corrected / 8 adjudicated by matching note text loosely;
+  correct is 27 + 8. I had also told Divya "10 adjudicated" earlier in the session; it's 8 (#55 and #90 are among
+  them). The log already said 8.
+- **Mixed number styles** (Indian "3,84,971" vs "384,971" in reports): unified on international grouping.
+- **Permission system blocked** installing nothing; npm 11 held back esbuild's install script, which turned out
+  not to be needed (build works without it).
+
 ### Next
+- **Divya:** switch GitHub Pages on (Settings → Pages → Source: GitHub Actions) if Claude can't.
 - Nov 1: first scheduled memo (October). Nov 2: first scheduled weekly report (follows up BigBasket availability).
 - M8 dashboard (design bar: must look designed, not generic), M9 ship. Diwali deep-dive after Nov 8.
 - After Nov 5: labelling guide, "unsure" key, blind re-check, read "other".

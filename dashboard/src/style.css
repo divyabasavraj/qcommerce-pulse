@@ -1,0 +1,365 @@
+@import url("observablehq:default.css");
+
+/* Q-Commerce Pulse. One family throughout: Anek (Ek Type, India) — condensed widths for headlines, normal for
+   text, Anek Devanagari for Hindi review text. App colours echo each brand where colour-blind checks allow
+   (Blinkit yellow, Zepto violet, BigBasket green; Instamart magenta), validated all-pairs in both modes. */
+:root {
+  color-scheme: light;
+  --page: #ffffff;
+  --ink: #1f2a44;
+  --ink-2: #4a5368;
+  --muted: #646c7e;
+  --grid: #e6e8ee;
+  --axis: #c9cdd6;
+  --band: rgba(31, 42, 68, 0.08);
+  --worse: #d03b3b;
+  --better: #2a78d6;
+  --app-blinkit: #eda100;
+  --app-zepto: #6250d6;
+  --app-instamart: #e87ba4;
+  --app-bigbasket: #008300;
+
+  --sans-serif: "Anek Latin", "Anek Devanagari", system-ui, sans-serif;
+  --theme-background: var(--page);
+  --theme-background-alt: #f3f4f7;
+  --theme-foreground: var(--ink);
+  --theme-foreground-focus: var(--ink);
+  --theme-foreground-muted: var(--muted);
+  --theme-foreground-faint: var(--axis);
+  --theme-foreground-fainter: var(--grid);
+  --theme-foreground-faintest: #f3f4f7;
+  --observablehq-max-width: 1120px;
+  --measure: 66ch;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --page: #17181c;
+    --ink: #e9ecf2;
+    --ink-2: #b5bcca;
+    --muted: #8e96a8;
+    --grid: #2a2d35;
+    --axis: #3a3e48;
+    --band: rgba(233, 236, 242, 0.09);
+    --worse: #e66767;
+    --better: #3987e5;
+    --app-blinkit: #c98500;
+    --app-zepto: #9085e9;
+    --app-instamart: #d55181;
+    --app-bigbasket: #008300;
+    --theme-background-alt: #1f2026;
+    --theme-foreground-faintest: #1f2026;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #17181c;
+  --ink: #e9ecf2;
+  --ink-2: #b5bcca;
+  --muted: #8e96a8;
+  --grid: #2a2d35;
+  --axis: #3a3e48;
+  --band: rgba(233, 236, 242, 0.09);
+  --worse: #e66767;
+  --better: #3987e5;
+  --app-blinkit: #c98500;
+  --app-zepto: #9085e9;
+  --app-instamart: #d55181;
+  --app-bigbasket: #008300;
+  --theme-background-alt: #1f2026;
+  --theme-foreground-faintest: #1f2026;
+}
+
+html {
+  background: var(--page);
+}
+body {
+  background: var(--page);
+  color: var(--ink);
+  font: 400 17px/1.55 var(--sans-serif);
+  font-stretch: 100%;
+}
+
+/* Header: wordmark set wide, page links set normal. */
+#observablehq-header {
+  border-bottom: none;
+  font-family: var(--sans-serif);
+}
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 2rem;
+  width: 100%;
+}
+.wordmark {
+  font-size: 19px;
+  font-weight: 650;
+  font-stretch: 125%;
+  color: var(--ink);
+  text-decoration: none;
+}
+.site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
+  font-size: 15px;
+}
+.site-nav a {
+  color: var(--ink-2);
+  text-decoration: none;
+  padding: 0.15rem 0;
+  border-bottom: 2px solid transparent;
+}
+.site-nav a:hover {
+  color: var(--ink);
+}
+.site-nav a[aria-current="page"] {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+}
+a:focus-visible,
+button:focus-visible,
+select:focus-visible,
+input:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--better);
+  outline-offset: 2px;
+}
+
+/* Type scale (17px base, ratio ~1.25). Headlines condensed. */
+h1,
+h2,
+h3 {
+  color: var(--ink);
+  font-family: var(--sans-serif);
+  max-width: none;
+}
+h1 {
+  font-size: 34px;
+  font-weight: 650;
+  font-stretch: 80%;
+  line-height: 1.08;
+  margin: 0 0 0.75rem;
+}
+h2 {
+  font-size: 27px;
+  font-weight: 600;
+  font-stretch: 85%;
+  line-height: 1.15;
+  margin: 4rem 0 0.5rem;
+}
+h3 {
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.25;
+  margin: 2rem 0 0.25rem;
+}
+p,
+li,
+.lede {
+  max-width: var(--measure);
+}
+.lede {
+  font-size: 21px;
+  line-height: 1.45;
+  color: var(--ink-2);
+  margin: 0 0 1rem;
+}
+.caption {
+  font-size: 15px;
+  color: var(--muted);
+  max-width: var(--measure);
+}
+a {
+  color: inherit;
+  text-decoration-color: var(--axis);
+  text-underline-offset: 3px;
+}
+a:hover {
+  text-decoration-color: currentColor;
+}
+
+/* The one loud element: this week's finding as a sentence. */
+.hero {
+  font-size: clamp(2.3rem, 5.4vw, 4.6rem);
+  font-weight: 650;
+  font-stretch: 75%;
+  line-height: 1.02;
+  letter-spacing: -0.005em;
+  max-width: 20ch;
+  margin: 1.5rem 0 1.25rem;
+  text-wrap: balance;
+}
+.hero-sub {
+  font-size: 21px;
+  color: var(--ink-2);
+  max-width: var(--measure);
+  margin: 0 0 2.5rem;
+}
+
+/* Review quotes: plain, with the star rating as the only mark. */
+.quotes {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: 1.5rem 2.5rem;
+  max-width: none;
+}
+.quotes li {
+  max-width: none;
+  font-size: 17px;
+  line-height: 1.45;
+}
+.quotes .stars {
+  display: block;
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 0.35rem;
+}
+
+/* Actions: each owner gets a fixed column so the list scans by owner. */
+.actions {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+  max-width: 80ch;
+}
+.actions li {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr;
+  gap: 1rem;
+  padding: 0.9rem 0;
+  max-width: none;
+}
+.actions li + li {
+  border-top: 1px solid var(--grid);
+}
+.actions .owner {
+  font-weight: 650;
+  font-stretch: 85%;
+  font-size: 19px;
+}
+.actions .why {
+  color: var(--ink-2);
+  font-size: 15px;
+  display: block;
+  margin-top: 0.2rem;
+}
+
+/* App key: the swatch carries the colour, the text stays in ink. */
+.key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
+  font-size: 15px;
+  color: var(--ink-2);
+  margin: 0.5rem 0 0;
+}
+.key span::before {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 0.4rem;
+  background: var(--swatch);
+  vertical-align: 0;
+}
+.mark-worse,
+.mark-better {
+  font-weight: 600;
+  white-space: nowrap;
+}
+.mark-worse::before {
+  content: "▲ ";
+  color: var(--worse);
+}
+.mark-better::before {
+  content: "▼ ";
+  color: var(--better);
+}
+
+/* Big facts on the method page: number then words, no tiles. */
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
+  gap: 1.5rem 2rem;
+  margin: 1.5rem 0 0.5rem;
+}
+.facts div {
+  font-size: 15px;
+  color: var(--ink-2);
+  line-height: 1.35;
+}
+.facts b {
+  display: block;
+  font-size: 40px;
+  font-weight: 650;
+  font-stretch: 80%;
+  color: var(--ink);
+  line-height: 1.05;
+  margin-bottom: 0.2rem;
+}
+
+/* Tables: tabular figures, hairlines, no zebra. */
+table {
+  font-variant-numeric: tabular-nums;
+  font-size: 15px;
+}
+th {
+  font-weight: 600;
+  color: var(--ink-2);
+}
+details {
+  margin: 0.75rem 0 0;
+  max-width: none;
+}
+details summary {
+  cursor: pointer;
+  color: var(--ink-2);
+  font-size: 15px;
+}
+form label,
+.inputs-3a86ea-label {
+  font-family: var(--sans-serif);
+}
+figure {
+  max-width: none;
+}
+figcaption {
+  font-size: 15px;
+  color: var(--muted);
+}
+[lang="hi"],
+.quotes q {
+  font-family: "Anek Latin", "Anek Devanagari", system-ui, sans-serif;
+}
+.quotes q {
+  quotes: "“" "”";
+}
+
+#observablehq-footer {
+  font: 13px/1.5 var(--sans-serif);
+  color: var(--muted);
+  border-top: 1px solid var(--grid);
+  padding-top: 1rem;
+  max-width: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Small multiples: caption sits tight under its panel title. */
+.grid h3 {
+  margin-bottom: 0;
+}
+.grid h3 + .caption {
+  margin: 0 0 0.5rem;
+}

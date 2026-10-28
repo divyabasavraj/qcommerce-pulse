@@ -16,6 +16,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 concurrency:
   group: daily-collect
@@ -89,3 +91,30 @@ jobs:
           git commit -m "Reports: $(git diff --cached --name-only -- 'reports/*.md' | xargs -n1 basename | tr '\n' ' ')"
           git pull --rebase origin main
           git push origin HEAD:main
+
+      # Dashboard (dashboard/, Observable Framework): rebuilt from today's data and published to GitHub Pages.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: dashboard/package-lock.json
+
+      - name: Build the dashboard
+        working-directory: dashboard
+        run: |
+          npm ci --no-fund --no-audit
+          npm run build
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dashboard/dist
+
+  deploy-dashboard:
+    needs: collect
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
