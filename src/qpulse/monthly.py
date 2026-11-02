@@ -8,6 +8,7 @@ uv run python -m qpulse.monthly                     # latest complete month -> r
 uv run python -m qpulse.monthly --month 2026-09     # a past month
 uv run python -m qpulse.monthly --llm               # try an LLM-written summary
 uv run python -m qpulse.monthly --skip-existing     # CI: do nothing if the month's memo exists
+uv run python -m qpulse.monthly --due               # CI: print true if the latest settled month has no memo yet
 """
 import argparse
 import json
@@ -20,7 +21,7 @@ from qpulse.classify import THEMES_OUT
 from qpulse.config import APP_NAMES, REPORT_MODEL, ROOT
 from qpulse.db import connect
 from qpulse.factcheck import llm_summary
-from qpulse.metrics import SQL, setup
+from qpulse.metrics import SQL, settled_through, setup
 from qpulse.quality import md_table
 from qpulse.weekly import COMPLAINTS, LABEL
 
@@ -46,7 +47,12 @@ def load(con, month: date | None) -> tuple[pd.DataFrame, pd.DataFrame, date]:
     themes = con.sql("SELECT * FROM monthly_themes").df()
     for df in (apps, themes):
         df["month"] = pd.to_datetime(df["month"]).dt.date
-    month = month or apps["month"].max()
+    if month is None:
+        ends = pd.to_datetime(apps["month"]) + pd.offsets.MonthEnd(0)
+        done = apps.loc[ends.dt.date <= settled_through(con), "month"]
+        if done.empty:
+            raise SystemExit(f"no settled month yet (data settled through {settled_through(con)})")
+        month = done.max()
     if month not in set(apps["month"]):
         raise SystemExit(f"no complete month {month}; latest is {apps['month'].max()}")
     return apps, themes, month
@@ -275,15 +281,19 @@ def template_summary(apps, month, fixes, score) -> str:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--month", type=lambda s: date.fromisoformat(s + "-01"), help="YYYY-MM (default: latest complete)")
+    parser.add_argument("--month", type=lambda s: date.fromisoformat(s + "-01"), help="YYYY-MM (default: latest settled)")
     parser.add_argument("--model", default=REPORT_MODEL)
     parser.add_argument("--llm", action="store_true", help="try an LLM-written summary (off by default)")
     parser.add_argument("--skip-existing", action="store_true", help="do nothing if the month's memo exists (CI)")
+    parser.add_argument("--due", action="store_true", help="print true/false: is the month's memo missing? (CI)")
     args = parser.parse_args()
 
     con = connect()
     apps, themes, month = load(con, args.month)
     key = f"{month:%Y-%m}"
+    if args.due:
+        print(str(not (REPORTS / f"{key}.md").exists()).lower())
+        return
     if args.skip_existing and (REPORTS / f"{key}.md").exists():
         print(f"reports/monthly/{key}.md already exists; skipping")
         return

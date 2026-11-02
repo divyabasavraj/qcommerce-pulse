@@ -57,13 +57,15 @@ jobs:
           gh release upload data data/run_log.csv --clobber
           if [ -f data/themes.parquet ]; then gh release upload data data/themes.parquet --clobber; fi
 
-      # Reports run after collection, so the week / month that just ended is complete.
-      # Weekly report on Mondays (IST), monthly memo on the 1st (IST), or when asked for in a manual run.
+      # Reports run after collection. Every day, each script checks whether its latest settled period (data runs
+      # REVIEW_LAG_DAYS past the period's end, because the Play Store shows reviews 1-2 days late) has a report
+      # yet; so the weekly report lands ~Wednesday and the memo ~the 3rd. A manual run can force either.
       - name: Which reports are due?
         id: due
         run: |
-          echo "weekly=$([ "$(TZ=Asia/Kolkata date +%u)" = 1 ] || [ "${{ inputs.weekly_report }}" = true ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
-          echo "monthly=$([ "$(TZ=Asia/Kolkata date +%d)" = 01 ] || [ "${{ inputs.monthly_memo }}" = true ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "weekly=$([ "${{ inputs.weekly_report }}" = true ] && echo true || uv run python -m qpulse.weekly --due)" >> "$GITHUB_OUTPUT"
+          echo "monthly=$([ "${{ inputs.monthly_memo }}" = true ] && echo true || uv run python -m qpulse.monthly --due)" >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
 
       - name: Start Ollama with the report model
         if: steps.due.outputs.weekly == 'true'

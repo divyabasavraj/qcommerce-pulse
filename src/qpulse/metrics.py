@@ -9,14 +9,14 @@ Theme shares come from data/themes.parquet (written by qpulse.classify) when it 
 All numbers come from the .sql files in sql/; this module only wires them together.
 """
 import argparse
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 
 import duckdb
 import pandas as pd
 
 from qpulse.classify import THEMES_OUT
-from qpulse.config import ALERT_K, ALERT_MIN_N, BASELINE_WEEKS, METRICS_START, ROOT
+from qpulse.config import ALERT_K, ALERT_MIN_N, BASELINE_WEEKS, METRICS_START, REVIEW_LAG_DAYS, ROOT
 from qpulse.db import connect
 from qpulse.quality import md_table
 from qpulse.themes import THEME_KEYS
@@ -55,6 +55,12 @@ def setup(con: duckdb.DuckDBPyConnection, themes_csv: Path | None = None,
         parts.append("SELECT * FROM weekly_theme_metrics")
     con.execute("CREATE OR REPLACE VIEW all_metrics AS " + " UNION ALL ".join(parts))
     con.execute((SQL / "alerts.sql").read_text())
+
+
+def settled_through(con: duckdb.DuckDBPyConnection) -> date:
+    """Last day whose reviews are all in: newest review date minus REVIEW_LAG_DAYS. Needs reviews_clean."""
+    newest = con.sql("SELECT max(review_date) FROM reviews_clean").fetchone()[0]
+    return newest - timedelta(days=REVIEW_LAG_DAYS)
 
 
 def alerts_frame(con: duckdb.DuckDBPyConnection) -> pd.DataFrame:

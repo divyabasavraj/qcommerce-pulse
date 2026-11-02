@@ -8,6 +8,7 @@ uv run python -m qpulse.weekly                      # latest full week -> report
 uv run python -m qpulse.weekly --week 2026-10-12    # a past week
 uv run python -m qpulse.weekly --no-llm             # template summary only
 uv run python -m qpulse.weekly --skip-existing      # CI: do nothing if this week's report exists
+uv run python -m qpulse.weekly --due                # CI: print true if the latest settled week has no report yet
 """
 import argparse
 import json
@@ -20,7 +21,7 @@ from qpulse.classify import THEMES_OUT
 from qpulse.config import (ALERT_K, ALERT_MIN_N, APP_NAMES, BASELINE_WEEKS, REPORT_MODEL, ROOT, VERSION_MIN_N)
 from qpulse.db import connect
 from qpulse.factcheck import llm_summary
-from qpulse.metrics import SQL, alerts_frame, setup
+from qpulse.metrics import SQL, alerts_frame, settled_through, setup
 from qpulse.quality import md_table
 from qpulse.themes import THEME_KEYS
 
@@ -67,7 +68,11 @@ def load(con, week: date | None) -> tuple[pd.DataFrame, date]:
     se = con.sql("SELECT app, week, metric, se FROM all_metrics").df()
     df = df.merge(se, on=["app", "week", "metric"], how="left")
     df["week"] = df["week"].dt.date
-    week = week or df["week"].max()
+    if week is None:
+        done = df.loc[df["week"] + timedelta(days=6) <= settled_through(con), "week"]
+        if done.empty:
+            raise SystemExit(f"no settled week yet (data settled through {settled_through(con)})")
+        week = done.max()
     if week not in set(df["week"]):
         raise SystemExit(f"no metrics for week {week}; latest full week is {df['week'].max()}")
     con.execute(f"SET VARIABLE report_week = DATE '{week}'")
@@ -337,14 +342,18 @@ def template_summary(acts: list[dict], cur: pd.DataFrame) -> str:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--week", type=date.fromisoformat, help="Monday of the week to report (default: latest full week)")
+    parser.add_argument("--week", type=date.fromisoformat, help="Monday of the week to report (default: latest settled week)")
     parser.add_argument("--model", default=REPORT_MODEL)
     parser.add_argument("--no-llm", action="store_true")
     parser.add_argument("--skip-existing", action="store_true", help="do nothing if the week's report exists (CI)")
+    parser.add_argument("--due", action="store_true", help="print true/false: is the week's report missing? (CI)")
     args = parser.parse_args()
 
     con = connect()
     df, week = load(con, args.week)
+    if args.due:
+        print(str(not (REPORTS / f"{week}.md").exists()).lower())
+        return
     if args.skip_existing and (REPORTS / f"{week}.md").exists():
         print(f"reports/weekly/{week}.md already exists; skipping")
         return

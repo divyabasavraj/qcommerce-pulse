@@ -15,8 +15,8 @@ Automatic daily collection runs aren't listed here; they're in `run_log.csv` in 
 | 3 | Theme labelling | 1 day | 🟡 LLM labelled 3,300 reviews; hand labels 300/300 (27 corrected after review); LLM prompt v2: macro-F1 0.60, exact 70% on held-out hand labels 101–300 (v1: 0.59, 66%) |
 | 4 | Fast classifier | 0.5 day | ✅ Done 2026-10-28: TF-IDF + logistic regression, held-out macro-F1 0.59 (LLM 0.60), all 370k reviews in 10 s; running in the daily job |
 | 5 | SQL metrics + expected-range alerts | 1 day | ✅ Done 2026-10-28: rating, volume and theme-share metrics; alerts at k = 3 (0.7/week in backtest) |
-| 6 | Weekly report | 0.5 day | ✅ Done 2026-10-28: action list + follow-up + competitor + version watch; qwen2.5:3b summary fact-checked by code; written and committed by CI on Mondays |
-| 7 | Monthly memo + Diwali deep-dive | 1 day | 🟡 Regular memo done 2026-10-28 (written by CI on the 1st; Jul–Sep backfilled); Diwali deep-dive needs data from after Nov 8 |
+| 6 | Weekly report | 0.5 day | ✅ Done 2026-10-28: action list + follow-up + competitor + version watch; qwen2.5:3b summary fact-checked by code; written and committed by CI once the week's data has settled (~Wednesday) |
+| 7 | Monthly memo + Diwali deep-dive | 1 day | 🟡 Regular memo done 2026-10-28 (written by CI ~the 3rd, once the month's data has settled; Jul–Oct written); Diwali deep-dive needs data from after Nov 8 |
 | 8 | Dashboard | 0.5 day | ✅ Live 2026-10-28: https://divyabasavraj.github.io/qcommerce-pulse/ (Observable Framework, 5 pages, rebuilt by the daily job) |
 | 9 | Ship | 0.5 day | ⬜ |
 
@@ -583,3 +583,41 @@ the LLM labels at shifts -2…+2 was 8–13%, flat), so no offset explains it an
 - M8 dashboard (design bar: must look designed, not generic), M9 ship. Diwali deep-dive after Nov 8.
 - After Nov 5: labelling guide, "unsure" key, blind re-check, read "other".
 
+
+## 2026-11-02: Scheduled reports skipped a period; October memo; lag-aware report timing
+
+### Work done
+- **Found:** the Nov 1 run (memo day) and the Nov 2 run (Monday, weekly day) both passed, but neither wrote
+  a report. Logs: the memo picked **September** ("2026-09.md already exists; skipping") and the weekly picked
+  the **week of Oct 19**. Both were one period behind.
+- **Cause:** the Play Store shows reviews 1–2 days late. Checked per run (`collected_at` against newest
+  `review_at`): the Nov 1 run's newest review was Oct 30 12:24; the Nov 2 run's was Nov 1 13:27. The SQL counts
+  a period as complete once the newest review date is past its end, so on the 1st October was "not complete",
+  and on Monday the week ending Sunday was "not complete". With reports tried only on the 1st / Mondays, every
+  report would have come out one period late, every time.
+- **October memo** written by hand today (`reports/monthly/2026-10.md` + `.json`): 58,469 reviews with text.
+  Refund / support is the #1 fix at all four apps; Zepto worst (19.0% of reviews, avg 1.12★; halving it
+  ≈ +0.24 to its 3.41 avg). Scorecard 5/8 right (missed: Blinkit 4.15 above range, Zepto 3.41 above,
+  BigBasket 3.95 below 4.04–4.28).
+- **Fix** (`config.py` `REVIEW_LAG_DAYS = 2`, `metrics.settled_through`, `weekly.py` / `monthly.py`,
+  `.github/workflows/daily.yml`): the default period is now the latest one whose last day is at least 2 days
+  before the newest review, so late reviews are in. Both scripts got `--due` (prints true/false), and the
+  workflow asks every day instead of only on the 1st and on Mondays. Expected: weekly report ~Wednesday,
+  memo ~the 3rd. Checked locally: data settled through Oct 30, both `--due` print `false`; tests pass.
+
+### Decisions
+- **Ask every day, not on fixed dates.** The lag varies (1–2 days in the runs above), so a fixed weekday
+  would still miss the period sometimes. `--skip-existing` and `--due` make daily checks safe.
+- **Lag applied only when picking the report period, not in the SQL views.** The dashboard and alerts keep
+  showing the newest full week. Changing the views would have changed M5 and M8.
+- **Kept the October memo written a day early** under the new rule: Oct 31 already has 1,897 reviews (a
+  normal day), so only a handful could still arrive.
+
+### Failures and fixes
+- The M6/M7 CI step was never tested on its scheduled day. All reports so far had been backfilled by hand,
+  with complete data. Both runs showed green because "already exists, skip" exits 0. Lesson: a skip on a
+  scheduled day should be treated as a warning.
+
+### Next
+- Wed Nov 4: first automatic weekly report (week of Oct 26) should appear. Check that it does.
+- M9 ship. Diwali deep-dive after Nov 8 (November memo, ~Dec 3).

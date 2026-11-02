@@ -35,6 +35,10 @@ ALERT_K = 3.0
 ALERT_MIN_N = 200
 # Version watch: a version needs this many reviews with text in the week to be judged.
 VERSION_MIN_N = 100
+# The Play Store shows reviews 1-2 days after they are written (newest review is ~1-2 days older than the
+# collection run). A report waits until the data runs this many days past the period's last day, so the
+# last days of the week / month are filled in before it is written.
+REVIEW_LAG_DAYS = 2
 
 # Weekly report text: small local model so it can run in CI (Ollama on the GitHub runner).
 REPORT_MODEL = "qwen2.5:3b"
