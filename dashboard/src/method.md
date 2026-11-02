@@ -30,7 +30,7 @@ const DAY = (iso) => new Date(iso + "T00:00:00").toLocaleDateString("en-IN", {da
 2. **Clean.** Copy-paste spam, link spam and emoji-only reviews are flagged and left out of the metrics.
 3. **Label.** A local language model (qwen2.5, 7 billion parameters) labelled ${n(m.train_size)} reviews with up to ten themes. A small, fast classifier learned from those labels and now labels every review in seconds.
 4. **Measure.** Each week, every metric is compared with its own previous ${m.alerts.baseline_weeks} weeks. It's flagged when it leaves that range by more than ${m.alerts.k} standard deviations, and only with at least ${m.alerts.min_n} reviews.
-5. **Report.** Flags become actions with an owner. A weekly report goes out every Monday and a memo on the 1st of each month. Next week checks whether last week's problems eased.
+5. **Report.** Flags become actions with an owner. A weekly report goes out each week and a memo each month, a couple of days after the period ends, because the Play Store shows reviews 1–2 days late. Next week checks whether last week's problems eased.
 
 ## How good are the themes?
 
