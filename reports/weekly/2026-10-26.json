@@ -1,0 +1,31 @@
+{
+  "week": "2026-10-26",
+  "reviews": 13505,
+  "actions": [],
+  "summary_source": "qwen2.5:3b, fact check passed first time",
+  "summary": "This week, BigBasket's missing or wrong item issue was 3.2% against the expected 1.8%, inside its normal range. Instamart's positive reviews were 74.7%, within the expected 67.2% to 75.1%. No actions are needed as all metrics are within their expected ranges. Follow up on BigBasket's availability issue, which dropped from 3.2% to 2.1%, showing no clear change.",
+  "facts": [
+    "13,505 reviews across the 4 apps this week.",
+    "No actions this week: nothing is worse than its expected range.",
+    "BigBasket missing / wrong item was 3.2% against a normal 1.8%; inside the expected range of 0.3% to 3.4% (normal variation, no action).",
+    "Instamart positive reviews was 74.7% against a normal 71.1%; inside the expected range of 67.2% to 75.1% (normal variation, no action).",
+    "Follow-up on last week's action: BigBasket availability / stock went from 3.2% to 2.1%: no clear change."
+  ],
+  "llm_attempts": [
+    {
+      "text": "This week, BigBasket's missing or wrong item issue was 3.2% against the expected 1.8%, inside its normal range. Instamart's positive reviews were 74.7%, within the expected 67.2% to 75.1%. No actions are needed as all metrics are within their expected ranges. Follow up on BigBasket's availability issue, which dropped from 3.2% to 2.1%, showing no clear change.",
+      "problems": []
+    }
+  ],
+  "followup": [
+    {
+      "app": "BigBasket",
+      "flagged": "availability / stock",
+      "last week": "3.2%",
+      "this week": "2.1%",
+      "change": "-1.1 pts",
+      "result": "no clear change",
+      "inside expected range": "yes"
+    }
+  ]
+}
