@@ -1,0 +1,20 @@
+{
+  "week": "2026-11-02",
+  "reviews": 15114,
+  "actions": [],
+  "summary_source": "qwen2.5:3b, fact check passed first time",
+  "summary": "This week, BigBasket's average rating was 3.66, inside its expected range of 3.60 to 4.44, and its 1\u2605 share was 28.4%, within its expected range of 10.0% to 29.9%. No actions are needed as both metrics are within their expected ranges.",
+  "facts": [
+    "15,114 reviews across the 4 apps this week.",
+    "No actions this week: nothing is worse than its expected range.",
+    "BigBasket average rating was 3.66 against a normal 4.02; inside the expected range of 3.60 to 4.44 (normal variation, no action).",
+    "BigBasket 1\u2605 share was 28.4% against a normal 20.0%; inside the expected range of 10.0% to 29.9% (normal variation, no action)."
+  ],
+  "llm_attempts": [
+    {
+      "text": "This week, BigBasket's average rating was 3.66, inside its expected range of 3.60 to 4.44, and its 1\u2605 share was 28.4%, within its expected range of 10.0% to 29.9%. No actions are needed as both metrics are within their expected ranges.",
+      "problems": []
+    }
+  ],
+  "followup": []
+}
