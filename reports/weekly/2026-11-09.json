@@ -1,0 +1,52 @@
+{
+  "week": "2026-11-09",
+  "reviews": 13533,
+  "actions": [
+    {
+      "app": "blinkit",
+      "metric": "theme:pricing_fees",
+      "kind": "share",
+      "denom": 9726,
+      "value": 0.06940160394818014,
+      "se": null,
+      "base_mean": 0.0585033863421105,
+      "expected_low": 0.04895191351368125,
+      "expected_high": 0.06805485917053974,
+      "z": 3.4229959510428296,
+      "owner": "Product",
+      "todo": "review recent fee or price changes and how they are shown in the app",
+      "strength": 3.4229959510428296
+    },
+    {
+      "app": "bigbasket",
+      "metric": "theme:quality_expiry",
+      "kind": "share",
+      "denom": 1056,
+      "value": 0.08238636363636363,
+      "se": null,
+      "base_mean": 0.052480125675012326,
+      "expected_low": 0.023087669517369763,
+      "expected_high": 0.08187258183265489,
+      "z": 3.0524401704593664,
+      "owner": "Ops",
+      "todo": "check freshness and expiry checks on fresh and dairy stock",
+      "strength": 3.0524401704593664
+    }
+  ],
+  "summary_source": "qwen2.5:3b, fact check passed first time",
+  "summary": "This week, Blinkit pricing / fees was 6.9% against the expected 4.9% to 6.8%, outside its normal range, indicating a need to review recent changes. BigBasket quality / expiry was 8.2% against the expected 2.3% to 8.2%, also outside its normal range, suggesting a need to check freshness and expiry checks on fresh and dairy stock. No other issues were flagged.",
+  "facts": [
+    "13,533 reviews across the 4 apps this week.",
+    "Action 1, owner Product: Blinkit pricing / fees was 6.9% this week against a normal 5.9%; outside the expected range of 4.9% to 6.8% (worse than normal). Next step: review recent fee or price changes and how they are shown in the app.",
+    "Action 2, owner Ops: BigBasket quality / expiry was 8.2% this week against a normal 5.2%; outside the expected range of 2.3% to 8.2% (worse than normal). Next step: check freshness and expiry checks on fresh and dairy stock.",
+    "BigBasket availability / stock was 3.3% against a normal 2.0%; inside the expected range of 0.2% to 3.8% (normal variation, no action).",
+    "Zepto quality / expiry was 7.0% against a normal 8.8%; inside the expected range of 6.4% to 11.2% (normal variation, no action)."
+  ],
+  "llm_attempts": [
+    {
+      "text": "This week, Blinkit pricing / fees was 6.9% against the expected 4.9% to 6.8%, outside its normal range, indicating a need to review recent changes. BigBasket quality / expiry was 8.2% against the expected 2.3% to 8.2%, also outside its normal range, suggesting a need to check freshness and expiry checks on fresh and dairy stock. No other issues were flagged.",
+      "problems": []
+    }
+  ],
+  "followup": []
+}
