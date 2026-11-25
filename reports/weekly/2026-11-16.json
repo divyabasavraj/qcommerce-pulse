@@ -1,0 +1,80 @@
+{
+  "week": "2026-11-16",
+  "reviews": 12230,
+  "actions": [
+    {
+      "app": "bigbasket",
+      "metric": "theme:pricing_fees",
+      "kind": "share",
+      "denom": 1095,
+      "value": 0.07123287671232877,
+      "se": null,
+      "base_mean": 0.05011379994115094,
+      "expected_low": 0.030333692250693257,
+      "expected_high": 0.06989390763160863,
+      "z": 3.203078128037607,
+      "owner": "Product",
+      "todo": "review recent fee or price changes and how they are shown in the app",
+      "strength": 3.203078128037607
+    },
+    {
+      "app": "zepto",
+      "metric": "theme:app_payment_bug",
+      "kind": "share",
+      "denom": 1209,
+      "value": 0.045492142266335814,
+      "se": null,
+      "base_mean": 0.029835111736460744,
+      "expected_low": 0.015156171070055572,
+      "expected_high": 0.04451405240286592,
+      "z": 3.1998965495599543,
+      "owner": "Product",
+      "todo": "investigate crashes, login and payment failures",
+      "strength": 3.1998965495599543
+    }
+  ],
+  "summary_source": "qwen2.5:3b, fact check passed on retry",
+  "summary": "This week, BigBasket pricing / fees was 7.1%, outside the expected range of 3.0% to 7.0%, indicating a significant issue. Investigate recent fee or price changes and how they are displayed in the app. Zepto quality / expiry was 5.0%, outside the expected range of 6.0% to 10.8%, showing improvement. No immediate actions are needed for Blinkit, as both pricing / fees and quality / expiry are within their expected ranges. Follow-up on last week's actions for BigBasket and Zepto.",
+  "facts": [
+    "12,230 reviews across the 4 apps this week.",
+    "Action 1, owner Product: BigBasket pricing / fees was 7.1% this week against a normal 5.0%; outside the expected range of 3.0% to 7.0% (worse than normal). Next step: review recent fee or price changes and how they are shown in the app.",
+    "Action 2, owner Product: Zepto app / payment bug was 4.5% this week against a normal 3.0%; outside the expected range of 1.5% to 4.5% (worse than normal). Next step: investigate crashes, login and payment failures.",
+    "Zepto quality / expiry was 5.0% against a normal 8.4%; outside the expected range of 6.0% to 10.8% (better than normal).",
+    "Blinkit partner behaviour was 1.0% against a normal 1.4%; inside the expected range of 1.0% to 1.8% (normal variation, no action).",
+    "Blinkit quality / expiry was 2.2% against a normal 2.7%; inside the expected range of 2.1% to 3.3% (normal variation, no action).",
+    "Follow-up on last week's action: Blinkit pricing / fees went from 6.9% to 6.4%: no clear change.",
+    "Follow-up on last week's action: BigBasket quality / expiry went from 8.2% to 5.9%: better."
+  ],
+  "llm_attempts": [
+    {
+      "text": "This week, BigBasket pricing / fees was 7.1%, outside the expected range of 3.0% to 7.0%, indicating a significant issue. Investigate recent fee or price changes and how they are displayed in the app. Zepto app / payment bug was 4.5%, also outside the expected range of 1.5% to 4.5%, suggesting crashes, login, and payment failures need investigation. Zepto quality / expiry was 5.0%, inside the expected range of 6.0% to 10.8%, showing improvement. No immediate actions are needed for Blinkit, as both pricing / fees and quality / expiry are within their expected ranges. Follow-up on last week's actions for BigBasket and Zepto.",
+      "problems": [
+        "\"inside\" the expected range is not true for the app named in: \"Zepto quality / expiry was 5.0%, inside the expected range of 6.0% to 10.8%, showing improvement.\""
+      ]
+    },
+    {
+      "text": "This week, BigBasket pricing / fees was 7.1%, outside the expected range of 3.0% to 7.0%, indicating a significant issue. Investigate recent fee or price changes and how they are displayed in the app. Zepto quality / expiry was 5.0%, outside the expected range of 6.0% to 10.8%, showing improvement. No immediate actions are needed for Blinkit, as both pricing / fees and quality / expiry are within their expected ranges. Follow-up on last week's actions for BigBasket and Zepto.",
+      "problems": []
+    }
+  ],
+  "followup": [
+    {
+      "app": "Blinkit",
+      "flagged": "pricing / fees",
+      "last week": "6.9%",
+      "this week": "6.4%",
+      "change": "-0.5 pts",
+      "result": "no clear change",
+      "inside expected range": "yes"
+    },
+    {
+      "app": "BigBasket",
+      "flagged": "quality / expiry",
+      "last week": "8.2%",
+      "this week": "5.9%",
+      "change": "-2.3 pts",
+      "result": "better",
+      "inside expected range": "yes"
+    }
+  ]
+}
